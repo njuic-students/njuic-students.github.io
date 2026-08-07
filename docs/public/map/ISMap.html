@@ -7,14 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --cat1: #3b82f6;
-            --cat1-bg: rgba(59, 130, 246, 0.15);
-            --cat2: #10b981;
-            --cat2-bg: rgba(16, 185, 129, 0.15);
-            --cat3: #f59e0b;
-            --cat3-bg: rgba(245, 158, 11, 0.15);
-            --cat4: #8b5cf6;
-            --cat4-bg: rgba(139, 92, 246, 0.15);
+            --cat1: #3b82f6; --cat1-bg: rgba(59,130,246,0.12);
+            --cat2: #10b981; --cat2-bg: rgba(16,185,129,0.12);
+            --cat3: #f59e0b; --cat3-bg: rgba(245,158,11,0.12);
+            --cat4: #8b5cf6; --cat4-bg: rgba(139,92,246,0.12);
         }
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -22,313 +18,116 @@
             color: #e2e8f0;
             min-height: 100vh;
         }
-
-        /* ========== Top Navigation / Breadcrumb ========== */
         .top-bar {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(15,23,42,0.95); backdrop-filter: blur(10px);
             border-bottom: 1px solid #1e293b;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
+            padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            flex-wrap: wrap;
         }
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+        .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; flex-wrap: wrap; }
+        .breadcrumb button, .breadcrumb .crumb-link {
+            color: #94a3b8; background: none; border: none;
+            cursor: pointer; font-size: inherit; transition: color 0.2s;
+            padding: 2px 4px; border-radius: 4px;
         }
-        .breadcrumb a, .breadcrumb button {
-            color: #94a3b8;
-            text-decoration: none;
-            transition: color 0.2s;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: inherit;
-        }
-        .breadcrumb a:hover, .breadcrumb button:hover { color: #60a5fa; }
+        .breadcrumb button:hover, .breadcrumb .crumb-link:hover { color: #60a5fa; background: rgba(96,165,250,0.08); }
         .breadcrumb .sep { color: #475569; }
         .breadcrumb .current { color: #f1f5f9; font-weight: 600; }
 
-        /* Search */
-        .search-box {
-            position: relative;
-            width: 280px;
-        }
+        .search-box { position: relative; width: 260px; }
         .search-box input {
-            width: 100%;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 8px 12px 8px 36px;
-            font-size: 0.875rem;
-            color: #e2e8f0;
-            outline: none;
-            transition: border-color 0.2s;
+            width: 100%; background: rgba(30,41,59,0.8); border: 1px solid #334155;
+            border-radius: 8px; padding: 8px 12px 8px 36px; font-size: 0.85rem;
+            color: #e2e8f0; outline: none; transition: border-color 0.2s;
         }
         .search-box input:focus { border-color: #60a5fa; }
         .search-box input::placeholder { color: #64748b; }
-        .search-box svg {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: #64748b;
-        }
+        .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #64748b; }
 
-        /* ========== Category Cards Grid ========== */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            padding: 32px 24px;
-            max-width: 1400px;
-            margin: 0 auto;
+        /* ====== Cards Grid ====== */
+        .cards-container { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .section-title { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+        .section-sub { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; }
+
+        .card {
+            background: rgba(30,41,59,0.7); border: 1px solid #334155;
+            border-radius: 14px; padding: 28px 24px; cursor: pointer;
+            transition: all 0.25s ease; text-align: center; position: relative; overflow: hidden;
         }
-        .cat-card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 40px 32px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .cat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,0.4); }
+        .card .card-icon { font-size: 2rem; margin-bottom: 12px; }
+        .card .card-name { font-size: 1.15rem; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+        .card .card-count { font-size: 0.8rem; color: #64748b; }
+
+        /* Cat card (Level 1) */
+        .cat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
         .cat-card:nth-child(1)::before { background: var(--cat1); }
         .cat-card:nth-child(2)::before { background: var(--cat2); }
         .cat-card:nth-child(3)::before { background: var(--cat3); }
         .cat-card:nth-child(4)::before { background: var(--cat4); }
-        .cat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-        .cat-card:nth-child(1):hover { border-color: var(--cat1); background: rgba(59, 130, 246, 0.1); }
-        .cat-card:nth-child(2):hover { border-color: var(--cat2); background: rgba(16, 185, 129, 0.1); }
-        .cat-card:nth-child(3):hover { border-color: var(--cat3); background: rgba(245, 158, 11, 0.1); }
-        .cat-card:nth-child(4):hover { border-color: var(--cat4); background: rgba(139, 92, 246, 0.1); }
+        .cat-card:nth-child(1):hover { border-color: var(--cat1); background: rgba(59,130,246,0.08); }
+        .cat-card:nth-child(2):hover { border-color: var(--cat2); background: rgba(16,185,129,0.08); }
+        .cat-card:nth-child(3):hover { border-color: var(--cat3); background: rgba(245,158,11,0.08); }
+        .cat-card:nth-child(4):hover { border-color: var(--cat4); background: rgba(139,92,246,0.08); }
 
-        .cat-icon {
-            width: 64px; height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 28px;
-        }
-        .cat-card:nth-child(1) .cat-icon { background: var(--cat1-bg); color: var(--cat1); }
-        .cat-card:nth-child(2) .cat-icon { background: var(--cat2-bg); color: var(--cat2); }
-        .cat-card:nth-child(3) .cat-icon { background: var(--cat3-bg); color: var(--cat3); }
-        .cat-card:nth-child(4) .cat-icon { background: var(--cat4-bg); color: var(--cat4); }
+        /* Sub cat card (Level 2) */
+        .sub-card { border-radius: 12px; padding: 22px 18px; }
+        .sub-card .card-icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .sub-card .card-name { font-size: 1rem; }
 
-        .cat-name {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #f1f5f9;
-            margin-bottom: 8px;
-        }
-        .cat-count {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        /* ========== Professor List View ========== */
-        .prof-list-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-        .prof-list-header {
-            margin-bottom: 24px;
-        }
-        .prof-list-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #f1f5f9;
-            margin-bottom: 4px;
-        }
-        .prof-list-header .subtitle {
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-
-        .prof-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 16px;
-        }
-
-        /* Professor Card */
+        /* ====== Professor Cards ====== */
+        .prof-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
         .prof-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: rgba(30,41,59,0.55); border: 1px solid #334155;
+            border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s;
         }
-        .prof-card:hover {
-            background: rgba(51, 65, 85, 0.7);
-            border-color: #60a5fa;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }
-        .prof-card .name-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .prof-card .name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #f1f5f9;
-        }
-        .prof-card .title-badge {
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 9999px;
-            font-weight: 500;
-            white-space: nowrap;
-            background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        .prof-card .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .prof-card .tag {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid #334155;
-        }
-        .prof-card .groups {
-            margin-top: 8px;
-            font-size: 0.75rem;
-            color: #64748b;
-        }
+        .prof-card:hover { background: rgba(51,65,85,0.7); border-color: #60a5fa; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+        .prof-card .name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .prof-card .name { font-size: 1.05rem; font-weight: 600; color: #f1f5f9; }
+        .prof-card .badge { font-size: 0.65rem; padding: 3px 9px; border-radius: 9999px; font-weight: 500; white-space: nowrap; background: rgba(59,130,246,0.18); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+        .prof-card .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+        .prof-card .tag { font-size: 0.68rem; padding: 2px 7px; border-radius: 4px; background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+        .prof-card .groups { margin-top: 6px; font-size: 0.73rem; color: #64748b; }
 
-        /* ========== Modal ========== */
+        /* ====== Modal ====== */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(4px);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: #1e293b;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            border-radius: 16px;
-            border: 1px solid #475569;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transform: translateY(20px);
-            transition: transform 0.3s;
+            background: #1e293b; width: 92%; max-width: 800px; max-height: 88vh;
+            border-radius: 14px; border: 1px solid #475569;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; overflow: hidden;
+            transform: translateY(20px); transition: transform 0.3s;
         }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0f172a;
+            padding: 18px 22px; border-bottom: 1px solid #334155;
+            display: flex; justify-content: space-between; align-items: center; background: #0f172a;
         }
-        .modal-header h3 { font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .modal-close {
-            background: none; border: none;
-            color: #64748b; font-size: 1.5rem;
-            cursor: pointer; transition: color 0.2s;
-            line-height: 1;
-        }
+        .modal-header h3 { font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .modal-close { background: none; border: none; color: #64748b; font-size: 1.4rem; cursor: pointer; transition: color 0.2s; line-height: 1; }
         .modal-close:hover { color: #fff; }
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-            color: #cbd5e1;
-        }
-        .modal-body .section { margin-bottom: 20px; }
-        .modal-body .section-label {
-            font-size: 0.7rem;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .modal-body .section-value { font-size: 0.9rem; line-height: 1.7; color: #e2e8f0; }
-        .modal-body .section-value a { color: #60a5fa; text-decoration: none; }
-        .modal-body .section-value a:hover { text-decoration: underline; }
-        .modal-body .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-        .modal-body .tag-item {
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            background: rgba(59, 130, 246, 0.15);
-            color: #93c5fd;
-            border: 1px solid rgba(59, 130, 246, 0.25);
-        }
-        .modal-body .group-item {
-            display: inline-block;
-            padding: 4px 12px;
-            margin: 2px 4px 2px 0;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            background: #334155;
-            color: #cbd5e1;
-        }
-
-        /* ========== Empty state ========== */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-        }
-        .empty-state svg { width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5; }
-
-        /* ========== Scrollbar ========== */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-
-        /* ========== Responsive ========== */
+        .modal-body { padding: 22px; overflow-y: auto; color: #cbd5e1; }
+        .modal-body .sec { margin-bottom: 18px; }
+        .modal-body .sec-label { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 5px; }
+        .modal-body .sec-value { font-size: 0.88rem; line-height: 1.7; color: #e2e8f0; }
+        .modal-body .sec-value a { color: #60a5fa; text-decoration: none; }
+        .modal-body .sec-value a:hover { text-decoration: underline; }
+        .tag-item { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 0.78rem; background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); margin: 2px 4px 2px 0; }
+        .group-item { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: 0.78rem; background: #334155; color: #cbd5e1; margin: 2px 4px 2px 0; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
+        .empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; opacity: 0.4; }
+        ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: #1e293b; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         @media (max-width: 640px) {
-            .category-grid { grid-template-columns: 1fr; padding: 16px; }
-            .prof-grid { grid-template-columns: 1fr; }
+            .cards-grid, .prof-grid { grid-template-columns: 1fr; }
             .top-bar { flex-direction: column; align-items: flex-start; }
             .search-box { width: 100%; }
         }
@@ -336,310 +135,275 @@
 </head>
 <body>
 
-    <!-- ========== Top Bar ========== -->
-    <div class="top-bar">
-        <div class="breadcrumb" id="breadcrumb">
-            <span class="current" style="font-size:1.1rem;font-weight:700;">🔬 集成电路学院</span>
-        </div>
-        <div class="search-box">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            <input type="text" id="search-input" placeholder="搜索教师姓名、研究方向..."
-                   oninput="handleSearch(this.value)">
-        </div>
+<div class="top-bar">
+    <div class="breadcrumb" id="breadcrumb">
+        <span class="current" style="font-size:1.05rem;font-weight:700;">🔬 集成电路学院</span>
     </div>
+    <div class="search-box">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="search-input" placeholder="搜索教师姓名、研究方向…" oninput="handleSearch(this.value)">
+    </div>
+</div>
 
-    <!-- ========== Main Content Area ========== -->
-    <div id="main-content">
-        <!-- Category cards will be rendered here -->
-    </div>
+<div id="main-content"></div>
 
-    <!-- ========== Professor Detail Modal ========== -->
-    <div id="prof-modal" class="modal-overlay" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3>
-                    <span id="modal-name"></span>
-                    <span id="modal-title-badge" class="title-badge" style="font-size:0.75rem;"></span>
-                </h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-body"></div>
+<!-- Professor Modal -->
+<div id="prof-modal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3><span id="modal-name"></span><span id="modal-badge" class="badge" style="font-size:0.7rem;"></span></h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
+        <div class="modal-body" id="modal-body"></div>
     </div>
+</div>
 
 <script>
-// ==================== DATA & STATE ====================
+// ==================== DATA ====================
 let professorsData = [];
-let currentView = 'categories'; // 'categories' | 'professors'
-let currentCategory = null;
+let currentView = 'categories'; // 'categories' | 'subcategories' | 'professors' | 'search'
+let currentCat = null;
+let currentSub = null;
 let searchQuery = '';
 
-const CATEGORIES = [
-    { id: '电路设计',      name: '电路设计',      icon: '🔌', color: '#3b82f6' },
-    { id: '材料与器件',    name: '材料与器件',    icon: '🧪', color: '#10b981' },
-    { id: '光电与集成',    name: '光电与集成',    icon: '💡', color: '#f59e0b' },
-    { id: '装备与制造',    name: '装备与制造',    icon: '⚙️', color: '#8b5cf6' },
+const BIG_CATEGORIES = [
+    { id: '电路设计',   name: '电路设计',   icon: '🔌', color: '#3b82f6', subs: ['数字电路','模拟电路','EDA'] },
+    { id: '材料与器件', name: '材料与器件', icon: '🧪', color: '#10b981', subs: ['二维电子','自旋电子','硅基电子','新型存储','柔性电子'] },
+    { id: '光电与集成', name: '光电与集成', icon: '💡', color: '#f59e0b', subs: ['三维集成','光电集成'] },
+    { id: '装备与制造', name: '装备与制造', icon: '⚙️', color: '#8b5cf6', subs: ['先进装备','先进光刻'] },
 ];
 
 // Load data
 fetch('./professors.json')
     .then(r => r.json())
-    .then(data => {
-        professorsData = data;
-        renderCategories();
-    })
-    .catch(err => console.error('Failed to load professors data:', err));
+    .then(data => { professorsData = data; renderBigCategories(); })
+    .catch(err => console.error('Load error:', err));
 
-// ==================== RENDER: CATEGORY CARDS ====================
-function renderCategories() {
-    currentView = 'categories';
-    currentCategory = null;
-    updateBreadcrumb(null);
-
+// ==================== LEVEL 1: BIG CATEGORIES ====================
+function renderBigCategories() {
+    currentView = 'categories'; currentCat = null; currentSub = null;
+    updateBreadcrumb();
     const counts = {};
-    CATEGORIES.forEach(c => { counts[c.id] = professorsData.filter(p => p['大类'] === c.id).length; });
+    BIG_CATEGORIES.forEach(c => { counts[c.id] = professorsData.filter(p => p['大类'] === c.id).length; });
     const total = professorsData.length;
 
-    const html = `
-        <div class="category-grid">
-            ${CATEGORIES.map((cat, i) => `
-                <div class="cat-card" onclick="showCategory('${cat.id}')">
-                    <div class="cat-icon">${cat.icon}</div>
-                    <div class="cat-name">${cat.name}</div>
-                    <div class="cat-count">${counts[cat.id]} 位教师</div>
-                </div>
-            `).join('')}
-        </div>
-        <div style="text-align:center;color:#475569;font-size:0.8rem;padding-bottom:24px;">
-            共计 <span style="color:#94a3b8;font-weight:600;">${total}</span> 位教师 · 点击卡片浏览
-        </div>
-    `;
-    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('main-content').innerHTML = `
+        <div class="cards-container">
+            <p class="section-title">集成电路学院 · 教师图谱</p>
+            <p class="section-sub">按四大方向分类浏览，共 <b style="color:#94a3b8;">${total}</b> 位教师</p>
+            <div class="cards-grid">
+                ${BIG_CATEGORIES.map(c => `
+                    <div class="card cat-card" onclick="renderSubCategories('${c.id}')">
+                        <div class="card-icon">${c.icon}</div>
+                        <div class="card-name">${c.name}</div>
+                        <div class="card-count">${counts[c.id]} 位教师 · ${c.subs.length} 个子方向</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
     document.getElementById('search-input').value = '';
     searchQuery = '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ==================== RENDER: PROFESSOR LIST ====================
-function showCategory(catId) {
-    currentView = 'professors';
-    currentCategory = catId;
+// ==================== LEVEL 2: SUB CATEGORIES ====================
+function renderSubCategories(catId) {
+    currentView = 'subcategories'; currentCat = catId; currentSub = null;
     updateBreadcrumb(catId);
-    renderProfessorList();
+    const cat = BIG_CATEGORIES.find(c => c.id === catId);
+
+    // Count professors per sub-category
+    const subCounts = {};
+    cat.subs.forEach(s => {
+        subCounts[s] = professorsData.filter(p => p['大类'] === catId && p['小类'] === s).length;
+    });
+
+    document.getElementById('main-content').innerHTML = `
+        <div class="cards-container">
+            <p class="section-title">${cat.icon} ${cat.name}</p>
+            <p class="section-sub">${cat.subs.length} 个子方向 · 点击查看教师</p>
+            <div class="cards-grid">
+                ${cat.subs.map(sub => `
+                    <div class="card sub-card" onclick="renderProfessors('${catId}','${sub}')"
+                         style="border-left: 3px solid ${cat.color};">
+                        <div class="card-icon">📂</div>
+                        <div class="card-name">${sub}</div>
+                        <div class="card-count">${subCounts[sub]} 位教师</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function renderProfessorList() {
-    const cat = CATEGORIES.find(c => c.id === currentCategory);
-    let profs = professorsData.filter(p => p['大类'] === currentCategory);
+// ==================== LEVEL 3: PROFESSORS ====================
+function renderProfessors(catId, sub) {
+    currentView = 'professors'; currentCat = catId; currentSub = sub;
+    updateBreadcrumb(catId, sub);
+    const cat = BIG_CATEGORIES.find(c => c.id === catId);
 
+    let profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
     if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        profs = profs.filter(p => {
-            const name = (p['姓名'] || '').toLowerCase();
-            const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-            const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
-            return name.includes(q) || tags.includes(q) || groups.includes(q);
-        });
+        profs = profs.filter(p => nameOrTags(p).includes(q));
     }
 
     const profCards = profs.length > 0
         ? profs.map((p, i) => {
             const tags = (p['研究兴趣标签'] || []).slice(0, 5);
-            const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
             const groups = (p['所属的研究组'] || []).slice(0, 2).join(' · ');
             return `
-                <div class="prof-card" onclick="openModal('${currentCategory}', ${i})"
-                     style="border-left: 3px solid ${cat.color};">
-                    <div class="name-row">
-                        <span class="name">${p['姓名']}</span>
-                        <span class="title-badge">${p['职称']}</span>
-                    </div>
-                    <div class="tags">${tagsHtml}</div>
-                    ${groups ? `<div class="groups">🏛 ${groups}</div>` : ''}
-                </div>
-            `;
+                <div class="prof-card" onclick="openModal('${catId}','${sub}',${i})"
+                     style="border-left:3px solid ${cat.color};">
+                    <div class="name-row"><span class="name">${p['姓名']}</span><span class="badge">${p['职称']}</span></div>
+                    <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                    ${groups?`<div class="groups">🏛 ${groups}</div>`:''}
+                </div>`;
         }).join('')
-        : `<div class="empty-state">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <p>${searchQuery ? '没有匹配的教师' : '该分类暂无教师'}</p>
-        </div>`;
+        : `<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><p>${searchQuery?'没有匹配的教师':'该小类暂无教师'}</p></div>`;
 
-    const html = `
-        <div class="prof-list-container">
-            <div class="prof-list-header">
-                <h2 style="display:flex;align-items:center;gap:10px;">
-                    <span>${cat.icon}</span> ${cat.name}
-                </h2>
-                <p class="subtitle">共 ${profs.length} 位教师</p>
-            </div>
+    document.getElementById('main-content').innerHTML = `
+        <div class="cards-container">
+            <p class="section-title">${cat.icon} ${cat.name} › ${sub}</p>
+            <p class="section-sub">共 <b style="color:#94a3b8;">${profs.length}</b> 位教师</p>
             <div class="prof-grid">${profCards}</div>
-        </div>
-    `;
-    document.getElementById('main-content').innerHTML = html;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+        </div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ==================== BREADCRUMB ====================
-function updateBreadcrumb(catId) {
-    const el = document.getElementById('breadcrumb');
-    if (!catId) {
-        el.innerHTML = `<span class="current" style="font-size:1.1rem;font-weight:700;">🔬 集成电路学院</span>`;
-    } else {
-        const cat = CATEGORIES.find(c => c.id === catId);
-        el.innerHTML = `
-            <button onclick="renderCategories()">🔬 集成电路学院</button>
-            <span class="sep">›</span>
-            <span class="current">${cat.icon} ${cat.name}</span>
-        `;
-    }
-}
-
-// ==================== SEARCH ====================
+// ==================== GLOBAL SEARCH ====================
 function handleSearch(query) {
     searchQuery = query.trim();
-    if (currentView === 'professors') {
-        renderProfessorList();
-    } else {
-        // Global search across all categories
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            const results = professorsData.filter(p => {
-                const name = (p['姓名'] || '').toLowerCase();
-                const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-                const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
-                return name.includes(q) || tags.includes(q) || groups.includes(q);
-            });
-            renderSearchResults(results);
-        } else {
-            renderCategories();
+    if (searchQuery && (currentView === 'categories' || currentView === 'subcategories')) {
+        const q = searchQuery.toLowerCase();
+        const results = professorsData.filter(p => nameOrTags(p).includes(q));
+        renderSearchResults(results);
+    } else if (searchQuery && currentView === 'professors') {
+        renderProfessors(currentCat, currentSub);
+    } else if (!searchQuery) {
+        if (currentView === 'search') {
+            renderBigCategories();
+        } else if (currentView === 'professors') {
+            renderProfessors(currentCat, currentSub);
         }
     }
 }
 
 function renderSearchResults(results) {
-    currentView = 'search';
+    currentView = 'search'; currentCat = null; currentSub = null;
+    updateBreadcrumb();
+    document.getElementById('breadcrumb').innerHTML = `
+        <button onclick="renderBigCategories()">🔬 集成电路学院</button>
+        <span class="sep">›</span>
+        <span class="current">🔍 "${searchQuery}" (${results.length})</span>`;
+
     const cards = results.length > 0
         ? results.map((p, i) => {
-            const cat = CATEGORIES.find(c => c.id === p['大类']) || { color: '#64748b', name: '未分类' };
+            const cat = BIG_CATEGORIES.find(c => c.id === p['大类']) || { color: '#64748b', name: '未分类' };
             const tags = (p['研究兴趣标签'] || []).slice(0, 5);
-            const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
             return `
-                <div class="prof-card" onclick="openModal('${p['大类'] || ''}', ${i})"
-                     style="border-left: 3px solid ${cat.color};">
-                    <div class="name-row">
-                        <span class="name">${p['姓名']}</span>
-                        <span class="title-badge">${p['职称']}</span>
-                    </div>
-                    <div class="tags">${tagsHtml}</div>
-                    <div class="groups" style="margin-top:4px;color:${cat.color};">${cat.name}</div>
-                </div>
-            `;
+                <div class="prof-card" onclick="openModalFromSearch(${i})" style="border-left:3px solid ${cat.color};">
+                    <div class="name-row"><span class="name">${p['姓名']}</span><span class="badge">${p['职称']}</span></div>
+                    <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+                    <div class="groups" style="color:${cat.color};">${cat.name}${p['小类']?' › '+p['小类']:''}</div>
+                </div>`;
         }).join('')
-        : `<div class="empty-state">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            <p>未找到匹配 "${searchQuery}" 的教师</p>
-        </div>`;
+        : `<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><p>未找到匹配 "${searchQuery}" 的教师</p></div>`;
 
     document.getElementById('main-content').innerHTML = `
-        <div class="prof-list-container">
-            <div class="prof-list-header">
-                <h2>🔍 搜索结果</h2>
-                <p class="subtitle">找到 ${results.length} 位匹配 "${searchQuery}" 的教师</p>
-            </div>
+        <div class="cards-container">
+            <p class="section-title">🔍 搜索结果</p>
+            <p class="section-sub">找到 ${results.length} 位教师</p>
             <div class="prof-grid">${cards}</div>
-        </div>
-    `;
-    updateBreadcrumb(null);
-    document.getElementById('breadcrumb').innerHTML = `
-        <button onclick="renderCategories()">🔬 集成电路学院</button>
-        <span class="sep">›</span>
-        <span class="current">🔍 搜索: ${searchQuery} (${results.length})</span>
-    `;
+        </div>`;
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Store search results for modal access
+let _searchResults = [];
+function renderSearchResults(r) { _searchResults = r; _renderSearchResultsImpl(r); }
+function _renderSearchResultsImpl(results) { /* placeholder, real func above */ }
+// Override: we inline the full logic above, but need to store for modal
+const origRenderSearch = renderSearchResults;
+renderSearchResults = function(results) {
+    _searchResults = results;
+    origRenderSearch(results);
+};
+
+function openModalFromSearch(index) {
+    openModalGeneric(_searchResults, index);
+}
+
+// ==================== BREADCRUMB ====================
+function updateBreadcrumb(catId, sub) {
+    const el = document.getElementById('breadcrumb');
+    if (!catId) {
+        el.innerHTML = `<span class="current" style="font-size:1.05rem;font-weight:700;">🔬 集成电路学院</span>`;
+    } else if (!sub) {
+        const cat = BIG_CATEGORIES.find(c => c.id === catId);
+        el.innerHTML = `
+            <button onclick="renderBigCategories()">🔬 集成电路学院</button>
+            <span class="sep">›</span>
+            <span class="current">${cat.icon} ${cat.name}</span>`;
+    } else {
+        const cat = BIG_CATEGORIES.find(c => c.id === catId);
+        el.innerHTML = `
+            <button onclick="renderBigCategories()">🔬 集成电路学院</button>
+            <span class="sep">›</span>
+            <button onclick="renderSubCategories('${catId}')">${cat.icon} ${cat.name}</button>
+            <span class="sep">›</span>
+            <span class="current">${sub}</span>`;
+    }
 }
 
 // ==================== MODAL ====================
-function openModal(catId, index) {
-    let profs;
-    if (currentView === 'search') {
+function openModal(catId, sub, index) {
+    let profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
+    if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        profs = professorsData.filter(p => {
-            const name = (p['姓名'] || '').toLowerCase();
-            const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-            const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
-            return name.includes(q) || tags.includes(q) || groups.includes(q);
-        });
-    } else {
-        profs = professorsData.filter(p => p['大类'] === catId);
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            profs = profs.filter(p => {
-                const name = (p['姓名'] || '').toLowerCase();
-                const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-                const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
-                return name.includes(q) || tags.includes(q) || groups.includes(q);
-            });
-        }
+        profs = profs.filter(p => nameOrTags(p).includes(q));
     }
+    openModalGeneric(profs, index);
+}
 
+function openModalGeneric(profs, index) {
     const p = profs[index];
     if (!p) return;
 
     document.getElementById('modal-name').textContent = p['姓名'];
-    document.getElementById('modal-title-badge').textContent = p['职称'];
+    document.getElementById('modal-badge').textContent = p['职称'];
 
+    const cat = BIG_CATEGORIES.find(c => c.id === p['大类']);
+    const catName = cat ? `${cat.icon} ${cat.name}` : '未分类';
     const tags = (p['研究兴趣标签'] || []).map(t => `<span class="tag-item">${t}</span>`).join('');
     const groups = (p['所属的研究组'] || []);
-    const groupsHtml = groups.length
-        ? groups.map(g => `<span class="group-item">${g}</span>`).join('')
-        : '<span style="color:#64748b;">暂无信息</span>';
-    const homepage = p['个人主页']
-        ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>`
-        : '<span style="color:#64748b;">暂无</span>';
-    const aiIntro = (p['AI 简介'] || '暂无详细简介').replace(/\n/g, '<br>');
+    const groupsHtml = groups.length ? groups.map(g => `<span class="group-item">${g}</span>`).join('') : '<span style="color:#64748b;">暂无信息</span>';
+    const hp = p['个人主页'] ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>` : '<span style="color:#64748b;">暂无</span>';
+    const intro = (p['AI 简介'] || '暂无详细简介').replace(/\n/g, '<br>');
     const recruit = (p['招收学生状况'] || '未提及').replace(/\n/g, '<br>');
-    const catName = CATEGORIES.find(c => c.id === p['大类'])?.name || '未分类';
 
     document.getElementById('modal-body').innerHTML = `
-        <div class="section">
-            <div class="section-label">所属大类</div>
-            <div class="section-value">${catName}</div>
-        </div>
-        <div class="section">
-            <div class="section-label">研究兴趣</div>
-            <div class="tag-list">${tags || '<span style="color:#64748b;">暂无</span>'}</div>
-        </div>
-        <div class="section">
-            <div class="section-label">所属研究组</div>
-            <div class="section-value">${groupsHtml}</div>
-        </div>
-        <div class="section">
-            <div class="section-label">个人主页</div>
-            <div class="section-value">${homepage}</div>
-        </div>
-        <div class="section">
-            <div class="section-label" style="color:#60a5fa;">学术简介</div>
-            <div class="section-value" style="text-align:justify;">${aiIntro}</div>
-        </div>
-        <div class="section" style="background:rgba(16,185,129,0.08);padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.2);">
-            <div class="section-label" style="color:#34d399;">📋 招生/招聘</div>
-            <div class="section-value">${recruit}</div>
-        </div>
-    `;
+        <div class="sec"><div class="sec-label">所属分类</div><div class="sec-value">${catName}${p['小类']?' › '+p['小类']:''}</div></div>
+        <div class="sec"><div class="sec-label">研究兴趣</div><div class="sec-value">${tags||'<span style="color:#64748b;">暂无</span>'}</div></div>
+        <div class="sec"><div class="sec-label">所属研究组</div><div class="sec-value">${groupsHtml}</div></div>
+        <div class="sec"><div class="sec-label">个人主页</div><div class="sec-value">${hp}</div></div>
+        <div class="sec"><div class="sec-label" style="color:#60a5fa;">学术简介</div><div class="sec-value" style="text-align:justify;">${intro}</div></div>
+        <div class="sec" style="background:rgba(16,185,129,0.07);padding:14px;border-radius:10px;border:1px solid rgba(16,185,129,0.18);">
+            <div class="sec-label" style="color:#34d399;">📋 招生/招聘</div><div class="sec-value">${recruit}</div>
+        </div>`;
     document.getElementById('prof-modal').classList.add('active');
 }
 
-function closeModal() {
-    document.getElementById('prof-modal').classList.remove('active');
-}
+function closeModal() { document.getElementById('prof-modal').classList.remove('active'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-// Esc to close modal
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-});
+// Helper
+function nameOrTags(p) {
+    const name = (p['姓名'] || '').toLowerCase();
+    const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
+    const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
+    return name + ' ' + tags + ' ' + groups;
+}
 </script>
 </body>
 </html>
