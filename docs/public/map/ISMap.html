@@ -145,7 +145,11 @@
     </div>
 </div>
 
-<div id="main-content"></div>
+<div id="main-content">
+    <div class="cards-container" style="text-align:center;padding:80px 20px;color:#64748b;">
+        <p style="font-size:1.2rem;">⏳ 正在加载教师数据...</p>
+    </div>
+</div>
 
 <!-- Professor Modal -->
 <div id="prof-modal" class="modal-overlay" onclick="closeModal()">
@@ -175,9 +179,17 @@ const BIG_CATEGORIES = [
 
 // Load data
 fetch('./professors.json')
-    .then(r => r.json())
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(data => { professorsData = data; renderBigCategories(); })
-    .catch(err => console.error('Load error:', err));
+    .catch(err => {
+        console.error('Load error:', err);
+        document.getElementById('main-content').innerHTML = `
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                <p style="color:#ef4444;">数据加载失败，请稍后刷新重试</p>
+                <p style="font-size:0.8rem;margin-top:4px;">${err.message}</p>
+            </div>`;
+    });
 
 // ==================== LEVEL 1: BIG CATEGORIES ====================
 function renderBigCategories() {
