@@ -263,13 +263,12 @@ function renderProfessors(catId, sub) {
     const profCards = profs.length > 0
         ? profs.map((p, i) => {
             const tags = (p['研究兴趣标签'] || []).slice(0, 5);
-            const groups = (p['所属的研究组'] || []).slice(0, 2).join(' · ');
             return `
                 <div class="prof-card" onclick="openModal('${catId}','${sub}',${i})"
                      style="border-left:3px solid ${cat.color};">
                     <div class="name-row"><span class="name">${p['姓名']}</span><span class="badge">${p['职称']}</span></div>
                     <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-                    ${groups?`<div class="groups">🏛 ${groups}</div>`:''}
+                </div>`;
                 </div>`;
         }).join('')
         : `<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><p>${searchQuery?'没有匹配的教师':'该小类暂无教师'}</p></div>`;
@@ -381,21 +380,14 @@ function openModalGeneric(profs, index) {
     const cat = BIG_CATEGORIES.find(c => c.id === p['大类']);
     const catName = cat ? `${cat.icon} ${cat.name}` : '未分类';
     const tags = (p['研究兴趣标签'] || []).map(t => `<span class="tag-item">${t}</span>`).join('');
-    const groups = (p['所属的研究组'] || []);
-    const groupsHtml = groups.length ? groups.map(g => `<span class="group-item">${g}</span>`).join('') : '<span style="color:#64748b;">暂无信息</span>';
     const hp = p['个人主页'] ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>` : '<span style="color:#64748b;">暂无</span>';
     const intro = (p['AI 简介'] || '暂无详细简介').replace(/\n/g, '<br>');
-    const recruit = (p['招收学生状况'] || '未提及').replace(/\n/g, '<br>');
 
     document.getElementById('modal-body').innerHTML = `
         <div class="sec"><div class="sec-label">所属分类</div><div class="sec-value">${catName}${p['小类']?' › '+p['小类']:''}</div></div>
         <div class="sec"><div class="sec-label">研究兴趣</div><div class="sec-value">${tags||'<span style="color:#64748b;">暂无</span>'}</div></div>
-        <div class="sec"><div class="sec-label">所属研究组</div><div class="sec-value">${groupsHtml}</div></div>
         <div class="sec"><div class="sec-label">个人主页</div><div class="sec-value">${hp}</div></div>
-        <div class="sec"><div class="sec-label" style="color:#60a5fa;">学术简介</div><div class="sec-value" style="text-align:justify;">${intro}</div></div>
-        <div class="sec" style="background:rgba(16,185,129,0.07);padding:14px;border-radius:10px;border:1px solid rgba(16,185,129,0.18);">
-            <div class="sec-label" style="color:#34d399;">📋 招生/招聘</div><div class="sec-value">${recruit}</div>
-        </div>`;
+        <div class="sec"><div class="sec-label" style="color:#60a5fa;">学术简介</div><div class="sec-value" style="text-align:justify;">${intro}</div></div>`;
     document.getElementById('prof-modal').classList.add('active');
 }
 
@@ -406,8 +398,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 function nameOrTags(p) {
     const name = (p['姓名'] || '').toLowerCase();
     const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-    const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
-    return name + ' ' + tags + ' ' + groups;
+    return name + ' ' + tags;
 }
 </script>
 </body>
