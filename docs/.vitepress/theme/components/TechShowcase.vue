@@ -76,13 +76,16 @@ onMounted(() => {
       // Draw substrate
       ctx.fillStyle = 'rgba(0,229,255,0.03)'; ctx.fillRect(40, midY + 15, W - 80, H - midY - 15)
 
-      // Source & Drain
-      [sx, dx].forEach(x => {
-        ctx.fillStyle = 'rgba(0,229,255,0.12)'
-        ctx.fillRect(x, sy, sdW, sdH)
-        ctx.strokeStyle = 'rgba(0,229,255,0.2)'; ctx.lineWidth = 1
-        ctx.strokeRect(x, sy, sdW, sdH)
-      })
+      // Source
+      ctx.fillStyle = 'rgba(0,229,255,0.12)'
+      ctx.fillRect(sx, sy, sdW, sdH)
+      ctx.strokeStyle = 'rgba(0,229,255,0.2)'; ctx.lineWidth = 1
+      ctx.strokeRect(sx, sy, sdW, sdH)
+      // Drain
+      ctx.fillStyle = 'rgba(0,229,255,0.12)'
+      ctx.fillRect(dx, dy, sdW, sdH)
+      ctx.strokeStyle = 'rgba(0,229,255,0.2)'; ctx.lineWidth = 1
+      ctx.strokeRect(dx, dy, sdW, sdH)
       // Labels
       ctx.fillStyle = 'rgba(0,229,255,0.35)'; ctx.font = '6px monospace'
       ctx.fillText('S', sx + sdW / 2 - 3, sy + sdH + 10)
@@ -972,13 +975,13 @@ onMounted(() => {
     function frame() {
       time++; ctx.clearRect(0, 0, W, H)
 
-      // Issue new instruction every 12 frames (occasionally stall: every ~80 frames)
-      const isStall = time % 80 > 70
-      if (time % 12 === 0 && !isStall) {
+      // Issue new instruction every 22 frames (occasionally stall: every ~100 frames)
+      const isStall = time % 100 > 90
+      if (time % 22 === 0 && !isStall) {
         instructions.push({ id: nextInsnId++, stage: 0, x: startX })
       }
       // Advance pipeline
-      if (time % 12 === 0) {
+      if (time % 22 === 0) {
         instructions.forEach(ins => { if (ins.stage < stages.length) ins.stage++ })
         instructions = instructions.filter(ins => ins.stage < stages.length)
       }
@@ -1043,7 +1046,7 @@ onMounted(() => {
       ctx.fillText('RV64IMAFDC', startX + totalW / 2 - 30, H - 10)
 
       // Highlight active extension
-      const extIdx = Math.floor(time / 40) % 7
+      const extIdx = Math.floor(time / 70) % 7
       const extLetters = ['R', 'V', '6', '4', 'I', 'M', 'A', 'F', 'D', 'C']
       // just cycle through highlighting individual chars of the RV64IMAFDC label
       const rvStr = 'RV64IMAFDC'
@@ -1092,7 +1095,7 @@ onMounted(() => {
 
       // Weight flow (horizontal, purple cubes) — one per row
       for (let r = 0; r < rows; r++) {
-        const wPhase = ((time * 0.15 + r * 0.4) % (cols + 2)) - 1
+        const wPhase = ((time * 0.07 + r * 0.4) % (cols + 2)) - 1
         if (wPhase < 0 || wPhase >= cols) continue
         const cx = gx + wPhase * (cellSz + gap), cy = gy + r * (cellSz + gap)
         ctx.fillStyle = 'rgba(124,77,255,0.25)'
@@ -1104,7 +1107,7 @@ onMounted(() => {
 
       // Activation flow (vertical, cyan cubes) — one per column
       for (let c = 0; c < cols; c++) {
-        const aPhase = ((time * 0.12 + c * 0.5) % (rows + 2)) - 1
+        const aPhase = ((time * 0.06 + c * 0.5) % (rows + 2)) - 1
         if (aPhase < 0 || aPhase >= rows) continue
         const cx = gx + c * (cellSz + gap), cy = gy + aPhase * (cellSz + gap)
         ctx.fillStyle = 'rgba(0,229,255,0.25)'
@@ -1117,8 +1120,8 @@ onMounted(() => {
       // MAC meeting flash
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const wPhase = ((time * 0.15 + r * 0.4) % (cols + 2)) - 1
-          const aPhase = ((time * 0.12 + c * 0.5) % (rows + 2)) - 1
+          const wPhase = ((time * 0.07 + r * 0.4) % (cols + 2)) - 1
+          const aPhase = ((time * 0.06 + c * 0.5) % (rows + 2)) - 1
           if (Math.abs(wPhase - c) < 0.15 && Math.abs(aPhase - r) < 0.15) {
             const cx = gx + c * (cellSz + gap) + cellSz / 2
             const cy = gy + r * (cellSz + gap) + cellSz / 2
