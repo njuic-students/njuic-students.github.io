@@ -290,6 +290,7 @@ function handleSearch(query) {
 }
 
 function renderSearchResults(results) {
+    _searchResults = results;
     currentView = 'search'; currentCat = null; currentSub = null;
     updateBreadcrumb();
     document.getElementById('breadcrumb').innerHTML = `
@@ -321,14 +322,6 @@ function renderSearchResults(results) {
 
 // Store search results for modal access
 let _searchResults = [];
-function renderSearchResults(r) { _searchResults = r; _renderSearchResultsImpl(r); }
-function _renderSearchResultsImpl(results) { /* placeholder, real func above */ }
-// Override: we inline the full logic above, but need to store for modal
-const origRenderSearch = renderSearchResults;
-renderSearchResults = function(results) {
-    _searchResults = results;
-    origRenderSearch(results);
-};
 
 function openModalFromSearch(index) {
     openModalGeneric(_searchResults, index);
