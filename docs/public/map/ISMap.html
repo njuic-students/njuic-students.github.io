@@ -3,350 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>研究方向导航</title>
+    <title>集成电路学院教师图谱</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        :root {
+            --cat1: #3b82f6;
+            --cat1-bg: rgba(59, 130, 246, 0.15);
+            --cat2: #10b981;
+            --cat2-bg: rgba(16, 185, 129, 0.15);
+            --cat3: #f59e0b;
+            --cat3-bg: rgba(245, 158, 11, 0.15);
+            --cat4: #8b5cf6;
+            --cat4-bg: rgba(139, 92, 246, 0.15);
+        }
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #0f172a; /* Slate 900 */
-            color: #e2e8f0; /* Slate 200 */
-            overflow: hidden;
-            user-select: none; /* Prevent text selection during drag */
+            background-color: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
         }
-        
-        #graph-container {
-            width: 100%;
-            height: 100vh;
-            position: absolute;
+
+        /* ========== Top Navigation / Breadcrumb ========== */
+        .top-bar {
+            position: sticky;
             top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        .sidebar {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40vw; /* Task 3: Default 40% width */
-            min-width: 320px;
-            max-width: 80vw;
-            height: calc(100vh - 40px);
-            background: rgba(30, 41, 59, 0.95); /* Slate 800 */
+            z-index: 50;
+            background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 0; /* Removing padding from container to handle separate scroll/resizer */
-            z-index: 10;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translateX(0);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar.hidden {
-            transform: translateX(120%);
-        }
-
-        .sidebar.collapsed {
-            height: auto;
-            min-height: 60px;
-        }
-
-        .sidebar.collapsed .sidebar-content-wrapper {
-            display: none;
-        }
-
-        .sidebar.collapsed #professor-block {
-            display: none;
-        }
-
-        .sidebar-header {
-            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid #1e293b;
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #334155;
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 12px 12px 0 0;
+            gap: 16px;
         }
-
-        .sidebar.collapsed .sidebar-header {
-            border-bottom: none;
-        }
-
-        .collapse-btn {
-            background: rgba(71, 85, 105, 0.5);
-            border: 1px solid #475569;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            transition: all 0.2s;
+        .breadcrumb {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .breadcrumb a, .breadcrumb button {
             color: #94a3b8;
-            font-size: 0.75rem;
-            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: inherit;
         }
+        .breadcrumb a:hover, .breadcrumb button:hover { color: #60a5fa; }
+        .breadcrumb .sep { color: #475569; }
+        .breadcrumb .current { color: #f1f5f9; font-weight: 600; }
 
-        .collapse-btn:hover {
-            background: rgba(96, 165, 250, 0.2);
-            border-color: #60a5fa;
-            color: #60a5fa;
+        /* Search */
+        .search-box {
+            position: relative;
+            width: 280px;
         }
-
-        .collapse-icon {
-            width: 14px;
-            height: 14px;
-            transition: transform 0.3s;
-        }
-
-        .sidebar.collapsed .collapse-icon {
-            transform: rotate(180deg);
-        }
-
-        /* Fullscreen Link Button */
-        .fullscreen-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 15;
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(10px);
+        .search-box input {
+            width: 100%;
+            background: rgba(30, 41, 59, 0.8);
             border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 8px;
+            padding: 8px 12px 8px 36px;
+            font-size: 0.875rem;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box input:focus { border-color: #60a5fa; }
+        .search-box input::placeholder { color: #64748b; }
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #64748b;
+        }
+
+        /* ========== Category Cards Grid ========== */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 32px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .cat-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 40px 32px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            text-decoration: none;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-
-        .fullscreen-link:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #60a5fa;
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
-            transform: scale(1.05);
-        }
-
-        .fullscreen-icon {
-            width: 20px;
-            height: 20px;
-            color: #94a3b8;
-            transition: color 0.3s;
-        }
-
-        .fullscreen-link:hover .fullscreen-icon {
-            color: #60a5fa;
-        }
-
-        /* Task 3: Resizer */
-        .resizer {
+        .cat-card::before {
+            content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 16px;
-            background: transparent;
-            cursor: ew-resize;
-            z-index: 20;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+        .cat-card:nth-child(1)::before { background: var(--cat1); }
+        .cat-card:nth-child(2)::before { background: var(--cat2); }
+        .cat-card:nth-child(3)::before { background: var(--cat3); }
+        .cat-card:nth-child(4)::before { background: var(--cat4); }
+        .cat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .cat-card:nth-child(1):hover { border-color: var(--cat1); background: rgba(59, 130, 246, 0.1); }
+        .cat-card:nth-child(2):hover { border-color: var(--cat2); background: rgba(16, 185, 129, 0.1); }
+        .cat-card:nth-child(3):hover { border-color: var(--cat3); background: rgba(245, 158, 11, 0.1); }
+        .cat-card:nth-child(4):hover { border-color: var(--cat4); background: rgba(139, 92, 246, 0.1); }
+
+        .cat-icon {
+            width: 64px; height: 64px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+        .cat-card:nth-child(1) .cat-icon { background: var(--cat1-bg); color: var(--cat1); }
+        .cat-card:nth-child(2) .cat-icon { background: var(--cat2-bg); color: var(--cat2); }
+        .cat-card:nth-child(3) .cat-icon { background: var(--cat3-bg); color: var(--cat3); }
+        .cat-card:nth-child(4) .cat-icon { background: var(--cat4-bg); color: var(--cat4); }
+
+        .cat-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+        .cat-count {
+            font-size: 0.85rem;
+            color: #64748b;
         }
 
-        .resizer::after {
-            content: "";
-            display: block;
-            width: 4px;
-            height: 48px;
-            background-color: #475569;
-            border-radius: 2px;
-            transition: background-color 0.2s;
+        /* ========== Professor List View ========== */
+        .prof-list-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
         }
-
-        .resizer:hover::after, .resizer.active::after {
-            background-color: #60a5fa; /* Blue 400 */
+        .prof-list-header {
+            margin-bottom: 24px;
         }
-        
-        .sidebar-content-wrapper {
-            padding: 20px 20px 0px 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Let inner content scroll */
-            width: 100%;
-        }
-        
-        #professor-block {
-            margin: 0px 20px 20px 20px;
-        }
-
-        /* D3 Elements */
-        .node circle {
-            stroke: #fff;
-            stroke-width: 1.5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .node text {
-            font-size: 10px;
-            pointer-events: none;
-            text-anchor: middle;
-            fill: #fff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-            font-weight: 500;
-        }
-
-        .link {
-            stroke: #475569;
-            stroke-opacity: 0.4;
-            stroke-width: 1px;
-            transition: stroke-opacity 0.3s;
-        }
-
-        .node:hover circle {
-            stroke: #60a5fa; /* Blue 400 */
-            stroke-width: 3px;
-        }
-        
-        .node.active circle {
-            stroke: #3b82f6; /* Blue 500 */
-            stroke-width: 4px;
-            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-
-        .tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            margin-right: 4px;
+        .prof-list-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f1f5f9;
             margin-bottom: 4px;
-            background: #334155;
+        }
+        .prof-list-header .subtitle {
+            color: #64748b;
+            font-size: 0.875rem;
         }
 
-        /* Filter Bubble Styles */
-        .filter-bubble {
-            padding: 6px 12px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
+        .prof-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
         }
-        .filter-bubble:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-        .filter-bubble.active {
-            box-shadow: 0 0 12px currentColor;
-        }
-    
-        /* Professor Card Styles */
+
+        /* Professor Card */
         .prof-card {
-            background: rgba(51, 65, 85, 0.5); /* Slate 700 with opacity */
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.2s;
         }
         .prof-card:hover {
-            background: rgba(71, 85, 105, 0.8);
+            background: rgba(51, 65, 85, 0.7);
             border-color: #60a5fa;
-            transform: translateX(2px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
-        .prof-name {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #f1f5f9;
+        .prof-card .name-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .prof-title-badge {
-            background-color: #3b82f6; /* Blue 500 */
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 8px;
+        .prof-card .name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        .prof-card .title-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
             border-radius: 9999px;
-            margin-left: 8px;
             font-weight: 500;
             white-space: nowrap;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
-        .prof-tags {
-            margin-top: 8px;
+        .prof-card .tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 6px;
         }
-        .prof-tag {
-            background-color: #1e293b; /* Slate 800 */
-            color: #94a3b8; /* Slate 400 */
+        .prof-card .tag {
             font-size: 0.7rem;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 4px;
+            background: #1e293b;
+            color: #94a3b8;
             border: 1px solid #334155;
         }
+        .prof-card .groups {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
 
-        /* Modal Styles */
+        /* ========== Modal ========== */
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
             z-index: 100;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: #1e293b; /* Slate 800 */
+            background: #1e293b;
             width: 90%;
             max-width: 800px;
             max-height: 90vh;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #475569;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             transform: translateY(20px);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.3s;
         }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
         .modal-header {
             padding: 20px 24px;
             border-bottom: 1px solid #334155;
@@ -355,966 +268,378 @@
             align-items: center;
             background: #0f172a;
         }
+        .modal-header h3 { font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .modal-close {
+            background: none; border: none;
+            color: #64748b; font-size: 1.5rem;
+            cursor: pointer; transition: color 0.2s;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #fff; }
         .modal-body {
             padding: 24px;
             overflow-y: auto;
             color: #cbd5e1;
         }
-        .modal-close {
-            background: none;
-            border: none;
+        .modal-body .section { margin-bottom: 20px; }
+        .modal-body .section-label {
+            font-size: 0.7rem;
             color: #64748b;
-            font-size: 1.5rem;
-            line-height: 1;
-            cursor: pointer;
-            transition: color 0.2s;
-            padding: 4px;
-        }
-        .modal-close:hover {
-            color: #fff;
-        }
-        .info-section {
-            margin-bottom: 24px;
-        }
-        .info-label {
-            font-size: 0.75rem;
-            color: #64748b; /* Slate 500 */
-            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-weight: 700;
+            margin-bottom: 6px;
         }
-        .info-value {
-            font-size: 0.95rem;
-            color: #e2e8f0;
-            line-height: 1.7;
-        }
-        .info-value a {
-            color: #60a5fa;
-            text-decoration: none;
-            border-bottom: 1px dashed #60a5fa;
-        }
-        .info-value a:hover {
+        .modal-body .section-value { font-size: 0.9rem; line-height: 1.7; color: #e2e8f0; }
+        .modal-body .section-value a { color: #60a5fa; text-decoration: none; }
+        .modal-body .section-value a:hover { text-decoration: underline; }
+        .modal-body .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .modal-body .tag-item {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: rgba(59, 130, 246, 0.15);
             color: #93c5fd;
-            border-bottom-style: solid;
+            border: 1px solid rgba(59, 130, 246, 0.25);
         }
-        
+        .modal-body .group-item {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px 4px 2px 0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: #334155;
+            color: #cbd5e1;
+        }
+
+        /* ========== Empty state ========== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        .empty-state svg { width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5; }
+
+        /* ========== Scrollbar ========== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 640px) {
+            .category-grid { grid-template-columns: 1fr; padding: 16px; }
+            .prof-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .search-box { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Fullscreen Link Button -->
-    <a href="/map/ISMap.html" class="fullscreen-link" title="全屏查看图谱" target="_blank">
-        <svg class="fullscreen-icon" t="1772555010372" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1830" width="200" height="200"><path d="M796.444672 426.667008c0 15.700992-12.74368 28.443648-28.444672 28.443648-15.700992 0-28.444672-12.742656-28.444672-28.443648v-102.001664L609.108992 455.110656c-11.092992 11.094016-29.126656 11.094016-40.219648 0-11.094016-11.092992-11.094016-29.126656 0-40.219648l130.445312-130.44736h-102.00064c-15.702016 0-28.444672-12.742656-28.444672-28.443648s12.742656-28.444672 28.443648-28.444672H768c15.700992 0 28.444672 12.74368 28.444672 28.444672v170.667008zM455.110656 609.108992l-130.445312 130.44736h102.00064c15.702016 0 28.444672 12.742656 28.444672 28.443648S442.368 796.444672 426.667008 796.444672H256c-15.700992 0-28.444672-12.74368-28.444672-28.444672V597.332992c0-15.700992 12.74368-28.443648 28.444672-28.443648 15.700992 0 28.444672 12.742656 28.444672 28.443648v102.001664l130.446336-130.445312c11.092992-11.094016 29.126656-11.094016 40.219648 0 11.094016 11.092992 11.094016 29.126656 0 40.219648z m398.22336-495.331328H170.665984c-31.460352 0-56.889344 25.428992-56.889344 56.889344v682.665984c0 31.460352 25.428992 56.889344 56.889344 56.889344h682.665984c31.460352 0 56.889344-25.428992 56.889344-56.889344V170.667008c0-31.460352-25.428992-56.889344-56.889344-56.889344z" fill="currentColor" p-id="1831"></path></svg>
-    </a>
-
-    <!-- Graph Container -->
-    <div id="graph-container"></div>
-
-    <!-- Info Sidebar -->
-    <!-- Always visible sidebar with category filters -->
-    <div id="sidebar" class="sidebar collapsed">
-        <!-- Task 3: Resizer Handle -->
-        <div id="sidebar-resizer" class="resizer"></div>
-        
-        <!-- Sidebar Header with Collapse Button -->
-        <div class="sidebar-header">
-            <h2 id="info-title" class="text-xl font-bold text-white">集成电路学院</h2>
-            <button class="collapse-btn" onclick="toggleSidebarCollapse()" title="折叠/展开侧边栏">
-                <svg class="collapse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-                </svg>
-                <span class="collapse-text">展开</span>
-            </button>
+    <!-- ========== Top Bar ========== -->
+    <div class="top-bar">
+        <div class="breadcrumb" id="breadcrumb">
+            <span class="current" style="font-size:1.1rem;font-weight:700;">🔬 集成电路学院</span>
         </div>
-        
-        <div class="sidebar-content-wrapper">
-
-            
-            <!-- Search & Filter Block -->
-            <div id="search-filter-block" class="shrink-0 mb-4 bg-slate-800/50 rounded-lg border border-slate-700/50 overflow-hidden">
-                <!-- Search Input -->
-                <div class="p-3 border-b border-slate-700/50">
-                    <div class="relative">
-                        <input type="text" id="search-input" placeholder="搜索教授姓名或研究方向..." 
-                            class="w-full bg-slate-900/50 border border-slate-600 rounded-lg px-4 py-2 pl-10 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                            oninput="handleSearch(this.value)">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-                
-                <!-- Collapsible Filter Section -->
-                <div class="flex justify-center">
-                    <button id="filter-toggle" class="w-full p-3 flex items-center justify-between text-left hover:bg-slate-700/30 transition-colors" onclick="toggleFilterPanel()">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                            </svg>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">领域筛选</span>
-                            <span id="filter-count" class="text-xs text-blue-400 hidden">(0)</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button id="clear-filter" class="text-xs text-slate-500 hover:text-red-400 transition-colors hidden" onclick="event.stopPropagation(); clearAllFilters()">
-                                清除
-                            </button>
-                            <svg id="filter-chevron" class="w-4 h-4 text-slate-500 transition-transform m-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </button>
-                    
-                    <div id="filter-panel" class="hidden overflow-y-auto" style="max-height: 280px;">
-                        <div id="filter-bubbles" class="p-3 pt-0 space-y-3">
-                            <!-- Filter bubbles will be generated by JS, grouped by category -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Professor List Block -->
-            <div id="professor-block" class="flex-1 bg-slate-800/50 rounded-lg border border-slate-700/50 flex flex-col overflow-hidden min-h-0 mb-1">
-                <!-- Inner scrollable container -->
-                <div id="info-content" class="text-sm text-slate-300 leading-relaxed flex-1 overflow-y-auto p-4">
-                    <!-- Professor list will be displayed here -->
-                </div>
-            </div>
+        <div class="search-box">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" id="search-input" placeholder="搜索教师姓名、研究方向..."
+                   oninput="handleSearch(this.value)">
         </div>
     </div>
 
-    <!-- Professor Details Modal -->
-    <div id="prof-modal" class="modal-overlay">
+    <!-- ========== Main Content Area ========== -->
+    <div id="main-content">
+        <!-- Category cards will be rendered here -->
+    </div>
+
+    <!-- ========== Professor Detail Modal ========== -->
+    <div id="prof-modal" class="modal-overlay" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3 class="text-lg font-bold text-white flex items-center gap-3">
-                    <span id="modal-prof-name">姓名</span>
-                    <span id="modal-prof-title" class="px-2 py-1 bg-blue-600/20 text-blue-400 text-xs rounded-full border border-blue-600/30">职称</span>
+                <h3>
+                    <span id="modal-name"></span>
+                    <span id="modal-title-badge" class="title-badge" style="font-size:0.75rem;"></span>
                 </h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <div id="prof-modal-body" class="modal-body">
-                <!-- Content injected by JS -->
-            </div>
+            <div class="modal-body" id="modal-body"></div>
         </div>
     </div>
 
-    <script>
-        // Task 1: Data Separation
-        let professorsData = []; 
-        let currentRelatedProfs = [];
-        let selectedNode = null; // Task 2: State management
-        let selectedCategories = new Set(); // Track selected category filters
+<script>
+// ==================== DATA & STATE ====================
+let professorsData = [];
+let currentView = 'categories'; // 'categories' | 'professors'
+let currentCategory = null;
+let searchQuery = '';
 
-        // Category definitions
-        const categories = [
-            { id: 0, name: "核心理论 & 数据", color: "#ef4444" },
-            { id: 1, name: "视觉 & 图形", color: "#3b82f6" },
-            { id: 2, name: "语言 & 生成式", color: "#10b981" },
-            { id: 3, name: "机器人 & 硬件", color: "#f59e0b" },
-            { id: 4, name: "交叉 & 前沿", color: "#8b5cf6" }
-        ];
+const CATEGORIES = [
+    { id: '电路设计',      name: '电路设计',      icon: '🔌', color: '#3b82f6' },
+    { id: '材料与器件',    name: '材料与器件',    icon: '🧪', color: '#10b981' },
+    { id: '光电与集成',    name: '光电与集成',    icon: '💡', color: '#f59e0b' },
+    { id: '装备与制造',    name: '装备与制造',    icon: '⚙️', color: '#8b5cf6' },
+];
 
-        // Fetch data
-        fetch('./professors.json')
-            .then(response => response.json())
-            .then(data => {
-                professorsData = data;
-                console.log("Professor data loaded successfully.");
-                // Initialize sidebar with all professors
-                initializeSidebar();
-            })
-            .catch(error => console.error('Error loading professors data:', error));
+// Load data
+fetch('./professors.json')
+    .then(r => r.json())
+    .then(data => {
+        professorsData = data;
+        renderCategories();
+    })
+    .catch(err => console.error('Failed to load professors data:', err));
 
-        // Initialize sidebar with filter bubbles and professor list
-        function initializeSidebar() {
-            renderFilterBubbles();
-            updateProfessorList();
-        }
+// ==================== RENDER: CATEGORY CARDS ====================
+function renderCategories() {
+    currentView = 'categories';
+    currentCategory = null;
+    updateBreadcrumb(null);
 
-        // Render category filter bubbles - grouped by category
-        function renderFilterBubbles() {
-            const container = document.getElementById('filter-bubbles');
-            
-            // Group nodes by category
-            const groupedNodes = {};
-            nodes.forEach(node => {
-                if (!groupedNodes[node.group]) {
-                    groupedNodes[node.group] = [];
-                }
-                groupedNodes[node.group].push(node);
-            });
-            
-            // Generate HTML for each category group
-            container.innerHTML = categories.map(cat => {
-                const catNodes = groupedNodes[cat.id] || [];
-                const nodeButtons = catNodes.map(node => `
-                    <button class="filter-bubble node-filter" data-node-id="${node.id}" 
-                        style="background: ${cat.color}20; border: 1px solid ${cat.color}; color: ${cat.color};"
-                        onclick="toggleNodeFilter('${node.id}')">
-                        ${node.id}
-                    </button>
-                `).join('');
-                
-                return `
-                    <div class="filter-group">
-                        <div class="filter-group-header" style="border-left: 3px solid ${cat.color}; padding-left: 8px; margin-bottom: 6px;">
-                            <span class="text-xs font-semibold" style="color: ${cat.color};">${cat.name}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5">
-                            ${nodeButtons}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+    const counts = {};
+    CATEGORIES.forEach(c => { counts[c.id] = professorsData.filter(p => p['大类'] === c.id).length; });
+    const total = professorsData.length;
 
-        // Set to track selected node IDs
-        let selectedNodeFilters = new Set();
-        
-        // Search query
-        let searchQuery = '';
-        
-        // Filter panel state
-        let filterPanelOpen = false;
-
-        // Toggle filter panel
-        function toggleFilterPanel() {
-            filterPanelOpen = !filterPanelOpen;
-            const panel = document.getElementById('filter-panel');
-            const chevron = document.getElementById('filter-chevron');
-            
-            if (filterPanelOpen) {
-                panel.classList.remove('hidden');
-                chevron.style.transform = 'rotate(180deg)';
-            } else {
-                panel.classList.add('hidden');
-                chevron.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        // Handle search input
-        function handleSearch(query) {
-            searchQuery = query.trim();
-            updateProfessorList();
-        }
-
-        // Toggle node filter selection
-        function toggleNodeFilter(nodeId) {
-            if (selectedNodeFilters.has(nodeId)) {
-                selectedNodeFilters.delete(nodeId);
-            } else {
-                selectedNodeFilters.add(nodeId);
-            }
-            
-            // Find the node to get its color
-            const nodeData = nodes.find(n => n.id === nodeId);
-            const cat = categories.find(c => c.id === nodeData.group);
-            
-            // Update bubble styles
-            document.querySelectorAll('.filter-bubble.node-filter').forEach(bubble => {
-                const bubbleNodeId = bubble.dataset.nodeId;
-                const bubbleNode = nodes.find(n => n.id === bubbleNodeId);
-                const bubbleCat = categories.find(c => c.id === bubbleNode.group);
-                
-                if (selectedNodeFilters.has(bubbleNodeId)) {
-                    bubble.style.background = bubbleCat.color;
-                    bubble.style.color = '#fff';
-                    bubble.classList.add('active');
-                } else {
-                    bubble.style.background = bubbleCat.color + '20';
-                    bubble.style.color = bubbleCat.color;
-                    bubble.classList.remove('active');
-                }
-            });
-            
-            // Show/hide clear button
-            const clearBtn = document.getElementById('clear-filter');
-            if (selectedNodeFilters.size > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-            
-            // Update graph highlighting
-            highlightSelectedNodes();
-            
-            // Update professor list
-            updateProfessorList();
-        }
-
-        // Clear all filters
-        function clearAllFilters() {
-            selectedNodeFilters.clear();
-            document.querySelectorAll('.filter-bubble.node-filter').forEach(bubble => {
-                const nodeId = bubble.dataset.nodeId;
-                const nodeData = nodes.find(n => n.id === nodeId);
-                const cat = categories.find(c => c.id === nodeData.group);
-                bubble.style.background = cat.color + '20';
-                bubble.style.color = cat.color;
-                bubble.classList.remove('active');
-            });
-            document.getElementById('clear-filter').classList.add('hidden');
-            resetVisuals();
-            updateProfessorList();
-        }
-
-        // Highlight selected nodes
-        function highlightSelectedNodes() {
-            if (selectedNodeFilters.size === 0) {
-                resetVisuals();
-                return;
-            }
-            
-            // Dim all nodes and links
-            node.style("opacity", 0.15);
-            link.style("stroke-opacity", 0.05);
-            
-            // Highlight selected nodes
-            node.filter(n => selectedNodeFilters.has(n.id))
-                .style("opacity", 1);
-            
-            // Highlight links between highlighted nodes
-            link.filter(l => selectedNodeFilters.has(l.source.id) && selectedNodeFilters.has(l.target.id))
-                .style("stroke-opacity", 0.6)
-                .style("stroke", "#fff");
-        }
-
-        // Get selected node IDs (for filtering professors)
-        function getSelectedNodeIds() {
-            return Array.from(selectedNodeFilters);
-        }
-
-        // Update professor list based on selected nodes and search query
-        function updateProfessorList() {
-            const content = document.getElementById('info-content');
-            const selectedNodeIds = getSelectedNodeIds();
-            
-            let filteredProfs = professorsData;
-            
-            // Apply node filter
-            if (selectedNodeFilters.size > 0) {
-                filteredProfs = filteredProfs.filter(p => {
-                    const tags = p["研究兴趣标签"] || [];
-                    return tags.some(tag => 
-                        selectedNodeIds.some(nodeId => 
-                            tag.toLowerCase().includes(nodeId.toLowerCase()) || 
-                            nodeId.toLowerCase().includes(tag.toLowerCase())
-                        )
-                    );
-                });
-            }
-            
-            // Apply search filter (精准匹配模式)
-            if (searchQuery) {
-                const queryLower = searchQuery.toLowerCase();
-                filteredProfs = filteredProfs.filter(p => {
-                    const name = p["姓名"] || '';
-                    const tags = (p["研究兴趣标签"] || []).join(' ');
-                    const groups = (p["所属的研究组"] || []).join(' ');
-                    
-                    // 缩小搜索范围：仅在 姓名、研究标签、组别 中搜索，排除长篇简介带来的噪声
-                    return name.toLowerCase().includes(queryLower) ||
-                           tags.toLowerCase().includes(queryLower) ||
-                           groups.toLowerCase().includes(queryLower);
-                });
-                
-                // 将结果排序：如果姓名直接包含搜索词，排在最前面
-                filteredProfs.sort((a, b) => {
-                    const aNameMatch = (a["姓名"] || '').toLowerCase().includes(queryLower);
-                    const bNameMatch = (b["姓名"] || '').toLowerCase().includes(queryLower);
-                    if (aNameMatch && !bNameMatch) return -1;
-                    if (!aNameMatch && bNameMatch) return 1;
-                    return 0;
-                });
-            }
-            
-            currentRelatedProfs = filteredProfs;
-            
-            // Generate Professor Cards
-            let profsHtml = "";
-            if (filteredProfs.length > 0) {
-                profsHtml = filteredProfs.map((p, index) => {
-                    const tags = p["研究兴趣标签"] || [];
-                    const tagsHtml = tags.slice(0, 4).map(t => `<span class="prof-tag">${t}</span>`).join("");
-                    const moreTags = tags.length > 4 ? `<span class="prof-tag" title="${tags.slice(4).join(', ')}">...</span>` : '';
-                    
-                    return `
-                        <div class="prof-card" onclick="openProfModal(${index})">
-                            <div class="prof-name">
-                                ${p["姓名"]}
-                                <span class="prof-title-badge">${p["职称"]}</span>
-                            </div>
-                            <div class="prof-tags">
-                                ${tagsHtml} ${moreTags}
-                            </div>
-                        </div>
-                    `;
-                }).join("");
-            } else {
-                profsHtml = `
-                    <div class='flex flex-col items-center justify-center p-6 text-slate-500 bg-slate-800/30 rounded-lg border border-slate-700/50 border-dashed'>
-                        <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <span class="text-sm">该筛选条件下暂无教授信息</span>
-                    </div>`;
-            }
-            
-            // Update filter count badge
-            const filterCountEl = document.getElementById('filter-count');
-            if (selectedNodeFilters.size > 0) {
-                filterCountEl.textContent = `(${selectedNodeFilters.size})`;
-                filterCountEl.classList.remove('hidden');
-            } else {
-                filterCountEl.classList.add('hidden');
-            }
-            
-            let filterStatus = '';
-            if (searchQuery && selectedNodeFilters.size > 0) {
-                filterStatus = `搜索 "${searchQuery}" + ${selectedNodeFilters.size} 个领域`;
-            } else if (searchQuery) {
-                filterStatus = `搜索 "${searchQuery}"`;
-            } else if (selectedNodeFilters.size > 0) {
-                filterStatus = `已选 ${selectedNodeFilters.size} 个领域`;
-            } else {
-                filterStatus = '显示全部教授';
-            }
-            
-            content.innerHTML = `
-                <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider">教授 / 学者列表</h4>
-                    <span class="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">${filteredProfs.length}</span>
+    const html = `
+        <div class="category-grid">
+            ${CATEGORIES.map((cat, i) => `
+                <div class="cat-card" onclick="showCategory('${cat.id}')">
+                    <div class="cat-icon">${cat.icon}</div>
+                    <div class="cat-name">${cat.name}</div>
+                    <div class="cat-count">${counts[cat.id]} 位教师</div>
                 </div>
-                <p class="text-xs text-slate-500 mb-3">${filterStatus}</p>
-                <div class="prof-list">
-                    ${profsHtml}
+            `).join('')}
+        </div>
+        <div style="text-align:center;color:#475569;font-size:0.8rem;padding-bottom:24px;">
+            共计 <span style="color:#94a3b8;font-weight:600;">${total}</span> 位教师 · 点击卡片浏览
+        </div>
+    `;
+    document.getElementById('main-content').innerHTML = html;
+    document.getElementById('search-input').value = '';
+    searchQuery = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== RENDER: PROFESSOR LIST ====================
+function showCategory(catId) {
+    currentView = 'professors';
+    currentCategory = catId;
+    updateBreadcrumb(catId);
+    renderProfessorList();
+}
+
+function renderProfessorList() {
+    const cat = CATEGORIES.find(c => c.id === currentCategory);
+    let profs = professorsData.filter(p => p['大类'] === currentCategory);
+
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        profs = profs.filter(p => {
+            const name = (p['姓名'] || '').toLowerCase();
+            const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
+            const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
+            return name.includes(q) || tags.includes(q) || groups.includes(q);
+        });
+    }
+
+    const profCards = profs.length > 0
+        ? profs.map((p, i) => {
+            const tags = (p['研究兴趣标签'] || []).slice(0, 5);
+            const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
+            const groups = (p['所属的研究组'] || []).slice(0, 2).join(' · ');
+            return `
+                <div class="prof-card" onclick="openModal('${currentCategory}', ${i})"
+                     style="border-left: 3px solid ${cat.color};">
+                    <div class="name-row">
+                        <span class="name">${p['姓名']}</span>
+                        <span class="title-badge">${p['职称']}</span>
+                    </div>
+                    <div class="tags">${tagsHtml}</div>
+                    ${groups ? `<div class="groups">🏛 ${groups}</div>` : ''}
                 </div>
             `;
-        }
+        }).join('')
+        : `<div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <p>${searchQuery ? '没有匹配的教师' : '该分类暂无教师'}</p>
+        </div>`;
 
-        
-        // --- Data Definitions ---
-        
-        // Groups: 0: Theory/Core, 1: Vision, 2: Language/Gen, 3: Hardware/Robot, 4: Interdisciplinary
-        const nodes = [
-            // Theory & Core (Red)
-            { id: "机器学习理论", group: 0, r: 25, desc: "AI的基石，研究算法的可行性、复杂度和收敛性。" },
-            { id: "数据挖掘", group: 0, r: 18, desc: "从海量数据中提取模式和知识，是ML的实战前沿。" },
-            { id: "可信人工智能与AI安全", group: 0, r: 20, desc: "研究AI的鲁棒性、隐私保护、公平性和可解释性。" },
-            { id: "强化学习与智能体", group: 0, r: 22, desc: "通过与环境交互进行决策学习，是通向AGI的关键路径。" },
-            { id: "图数据挖掘与图神经网络", group: 0, r: 18, desc: "处理非欧几里得数据（社交网络、分子结构）的核心技术。" },
+    const html = `
+        <div class="prof-list-container">
+            <div class="prof-list-header">
+                <h2 style="display:flex;align-items:center;gap:10px;">
+                    <span>${cat.icon}</span> ${cat.name}
+                </h2>
+                <p class="subtitle">共 ${profs.length} 位教师</p>
+            </div>
+            <div class="prof-grid">${profCards}</div>
+        </div>
+    `;
+    document.getElementById('main-content').innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-            // Vision & Graphics (Blue)
-            { id: "计算机视觉与模式识别", group: 1, r: 25, desc: "让计算机'看懂'图像，包括分类、检测、分割等。" },
-            { id: "三维计算机视觉", group: 1, r: 20, desc: "重建3D世界，是AR/VR和机器人的基础。" },
-            { id: "视频理解与生成", group: 1, r: 20, desc: "处理时间序列图像，涉及动作识别和视频内容生成。" },
-            { id: "计算机图形学", group: 1, r: 22, desc: "图像的合成与渲染，现与AI深度融合（如NeRF, Gaussian Splatting）。" },
-            { id: "医学图像分析", group: 1, r: 18, desc: "AI在医疗影像（CT, MRI）诊断中的垂直应用。" },
+// ==================== BREADCRUMB ====================
+function updateBreadcrumb(catId) {
+    const el = document.getElementById('breadcrumb');
+    if (!catId) {
+        el.innerHTML = `<span class="current" style="font-size:1.1rem;font-weight:700;">🔬 集成电路学院</span>`;
+    } else {
+        const cat = CATEGORIES.find(c => c.id === catId);
+        el.innerHTML = `
+            <button onclick="renderCategories()">🔬 集成电路学院</button>
+            <span class="sep">›</span>
+            <span class="current">${cat.icon} ${cat.name}</span>
+        `;
+    }
+}
 
-            // NLP & Generative (Green)
-            { id: "自然语言处理", group: 2, r: 25, desc: "让计算机理解和生成人类语言。" },
-            { id: "大语言模型", group: 2, r: 28, desc: "LLMs (如GPT)，基于Transformer的超大规模预训练模型。" },
-            { id: "生成式人工智能", group: 2, r: 26, desc: "AIGC，利用AI生成文本、图像、音频等新内容。" },
-            { id: "多模态智能", group: 2, r: 24, desc: "融合视觉、语言、音频等多种感官信息的理解与交互。" },
-            { id: "语音信号处理", group: 2, r: 18, desc: "语音识别(ASR)与合成(TTS)，人机交互的听觉入口。" },
-
-            // Hardware & Robotics (Orange)
-            { id: "机器人智能控制", group: 3, r: 22, desc: "具身智能的核心，涉及运动规划和操作控制。" },
-            { id: "智能感知硬件", group: 3, r: 18, desc: "传感器（激光雷达、摄像头）与底层信号处理。" },
-            { id: "智能芯片与硬件协同设计", group: 3, r: 20, desc: "为AI算法定制的计算架构（NPU, GPU）及软硬优化。" },
-
-            // Interdisciplinary & Frontier (Purple)
-            { id: "类脑智能", group: 4, r: 20, desc: "受人脑机制启发的新型计算架构（如脉冲神经网络）。" },
-            { id: "脑机接口与神经科学", group: 4, r: 20, desc: "大脑与外部设备的直接通信路径。" },
-            { id: "神经符号学习", group: 4, r: 18, desc: "结合神经网络的感知能力与符号逻辑的推理能力。" },
-            { id: "情感计算", group: 4, r: 16, desc: "识别和模拟人类情感，提升人机交互体验。" },
-            { id: "科学智能", group: 4, r: 22, desc: "AI for Science，利用AI加速物理、化学、生物等科学发现。" }
-        ];
-
-        // Defining connections based on the user's list logic
-        const links = [
-            // Core
-            { source: "机器学习理论", target: "数据挖掘" },
-            { source: "机器学习理论", target: "强化学习与智能体" },
-            { source: "机器学习理论", target: "图数据挖掘与图神经网络" },
-            { source: "可信人工智能与AI安全", target: "机器学习理论" },
-            { source: "可信人工智能与AI安全", target: "大语言模型" }, // Safety is huge in LLMs
-            
-            // Vision Cluster
-            { source: "计算机视觉与模式识别", target: "三维计算机视觉" },
-            { source: "计算机视觉与模式识别", target: "视频理解与生成" },
-            { source: "计算机视觉与模式识别", target: "医学图像分析" },
-            { source: "三维计算机视觉", target: "计算机图形学" }, // Strong overlap
-            { source: "三维计算机视觉", target: "机器人智能控制" }, // Slam/Nav
-            { source: "计算机图形学", target: "生成式人工智能" }, // Image gen
-            
-            // Language & GenAI Cluster
-            { source: "自然语言处理", target: "大语言模型" }, // Subset
-            { source: "自然语言处理", target: "语音信号处理" },
-            { source: "大语言模型", target: "生成式人工智能" },
-            { source: "大语言模型", target: "多模态智能" },
-            { source: "生成式人工智能", target: "视频理解与生成" }, // Sora etc
-            { source: "多模态智能", target: "计算机视觉与模式识别" },
-            { source: "多模态智能", target: "自然语言处理" },
-
-            // Hardware & Robotics
-            { source: "机器人智能控制", target: "强化学习与智能体" },
-            { source: "机器人智能控制", target: "智能感知硬件" },
-            { source: "智能芯片与硬件协同设计", target: "机器学习理论" }, // Efficiency
-            { source: "智能芯片与硬件协同设计", target: "智能感知硬件" },
-
-            // Interdisciplinary
-            { source: "类脑智能", target: "脑机接口与神经科学" },
-            { source: "类脑智能", target: "智能芯片与硬件协同设计" }, // Neuromorphic chips
-            { source: "神经符号学习", target: "机器学习理论" },
-            { source: "神经符号学习", target: "大语言模型" }, // Reasoning
-            { source: "情感计算", target: "多模态智能" },
-            { source: "科学智能", target: "图数据挖掘与图神经网络" }, // Molecular graphs
-            { source: "科学智能", target: "机器学习理论" }
-        ];
-
-        // --- D3 Visualization Setup ---
-
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        // Color scale matching Tailwind-ish colors
-        const colorScale = d3.scaleOrdinal()
-            .domain([0, 1, 2, 3, 4])
-            .range(["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"]); 
-            // Red, Blue, Green, Orange, Purple
-
-        const svg = d3.select("#graph-container")
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .attr("viewBox", [-width / 2, -height / 2, width, height])
-            .call(d3.zoom().on("zoom", (event) => {
-                g.attr("transform", event.transform);
-            }))
-            .on("click", function(event) {
-                // Task 2: Click blank area to reset
-                if (event.target.tagName === 'svg') {
-                    resetSelection();
-                }
+// ==================== SEARCH ====================
+function handleSearch(query) {
+    searchQuery = query.trim();
+    if (currentView === 'professors') {
+        renderProfessorList();
+    } else {
+        // Global search across all categories
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            const results = professorsData.filter(p => {
+                const name = (p['姓名'] || '').toLowerCase();
+                const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
+                const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
+                return name.includes(q) || tags.includes(q) || groups.includes(q);
             });
-
-        const g = svg.append("g");
-
-        // Calculate offset to move graph center to the left (avoiding the 40vw sidebar)
-        const centerXOffset = -width * 0.2; 
-        
-        // Simulation
-        const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-            .force("charge", d3.forceManyBody().strength(-400))
-            .force("x", d3.forceX(centerXOffset))  // Force nodes to gather on the left
-            .force("y", d3.forceY(0))
-            .force("collide", d3.forceCollide().radius(d => d.r + 10).iterations(2));
-
-        // Draw Lines
-        const link = g.append("g")
-            .attr("stroke", "#999")
-            .attr("stroke-opacity", 0.6)
-            .selectAll("line")
-            .data(links)
-            .join("line")
-            .attr("class", "link");
-
-        // Draw Nodes (Groups containing Circle + Text)
-        const node = g.append("g")
-            .selectAll(".node")
-            .data(nodes)
-            .join("g")
-            .attr("class", "node")
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
-
-        // Circles
-        node.append("circle")
-            .attr("r", d => d.r)
-            .attr("fill", d => colorScale(d.group))
-            .attr("opacity", 0.9);
-
-        // Text Labels
-        node.append("text")
-            .text(d => d.id)
-            .attr("dy", d => d.r + 15) // Position text below circle
-            .style("fill", "#cbd5e1")
-            .style("font-size", "10px")
-            .call(wrap, 100); // Helper to wrap text if needed
-
-        // --- Interactions (Task 2: Updated Logic) ---
-
-        // Helper to get connected node IDs
-        function getNeighbors(d) {
-            const neighbors = new Set();
-            links.forEach(l => {
-                if (l.source.id === d.id) neighbors.add(l.target.id);
-                if (l.target.id === d.id) neighbors.add(l.source.id);
-            });
-            return Array.from(neighbors);
+            renderSearchResults(results);
+        } else {
+            renderCategories();
         }
+    }
+}
 
-        // Highlight logic (visual only)
-        function highlightGraph(d) {
-            const neighbors = new Set(getNeighbors(d));
-            
-            // Dim all
-            node.style("opacity", 0.1);
-            link.style("stroke-opacity", 0.05);
-
-            // Highlight target
-            node.filter(n => n.id === d.id).style("opacity", 1);
-            
-            // Highlight neighbors
-            node.filter(n => neighbors.has(n.id)).style("opacity", 1);
-            
-            // Highlight links
-            link.filter(l => l.source.id === d.id || l.target.id === d.id)
-                .style("stroke-opacity", 1)
-                .style("stroke", "#fff");
-        }
-
-        // Reset visual state
-        function resetVisuals() {
-            node.style("opacity", 1);
-            link.style("stroke-opacity", 0.4).style("stroke", "#475569");
-        }
-
-        function resetSelection() {
-            selectedNode = null;
-            // Don't hide sidebar, just reset to node-based filtering
-            if (selectedNodeFilters.size > 0) {
-                highlightSelectedNodes();
-            } else {
-                resetVisuals();
-            }
-            d3.selectAll('.node').classed('active', false);
-            updateProfessorList();
-        }
-
-        // Mouse Hover: Suggestion only
-        node.on("mouseover", function(event, d) {
-            if (!selectedNode) {
-                highlightGraph(d);
-            } else if (selectedNode.id !== d.id) {
-                highlightGraph(d);
-            }
-        })
-        .on("mouseout", function() {
-            if (selectedNode) {
-                // Restore selected view
-                highlightGraph(selectedNode);
-            } else if (selectedNodeFilters.size > 0) {
-                // Restore node filter view
-                highlightSelectedNodes();
-            } else {
-                // Reset to default
-                resetVisuals();
-            }
-        })
-        .on("click", function(event, d) {
-            event.stopPropagation(); // Stop bubbling to SVG background
-            
-            if (selectedNode && selectedNode.id === d.id) {
-                // Click current -> Cancel
-                resetSelection();
-            } else {
-                // Select new
-                selectedNode = d;
-                
-                // Visual Update
-                d3.selectAll('.node').classed('active', false);
-                d3.select(this).classed('active', true);
-                
-                highlightGraph(d);
-                updateSidebarForNode(d, getNeighbors(d));
-            }
-        });
-
-        // Sidebar Update Logic for single node click
-        function updateSidebarForNode(d, neighbors) {
-            const title = document.getElementById('info-title');
-            const content = document.getElementById('info-content');
-
-            // Set content title
-            title.innerHTML = `<span class="text-slate-400 text-sm mr-2">领域:</span> ${d.id}`;
-            
-            // Generate neighbor tags
-            let neighborTags = neighbors.map(n => `<span class="tag text-slate-300 bg-slate-700 border border-slate-600">${n}</span>`).join("");
-            if (neighborTags === "") neighborTags = "<span class='text-slate-500 italic text-xs'>相对独立的领域</span>";
-
-            // Filter Professors based on node ID matching their tags
-            currentRelatedProfs = professorsData.filter(p => {
-                return (p["研究兴趣标签"] || []).some(tag => 
-                    tag.toLowerCase().includes(d.id.toLowerCase()) || 
-                    d.id.toLowerCase().includes(tag.toLowerCase())
-                );
-            });
-
-            // Generate Professor Cards
-            let profsHtml = "";
-            if (currentRelatedProfs.length > 0) {
-                profsHtml = currentRelatedProfs.map((p, index) => {
-                    const tags = p["研究兴趣标签"] || [];
-                    const tagsHtml = tags.slice(0, 4).map(t => `<span class="prof-tag">${t}</span>`).join("");
-                    const moreTags = tags.length > 4 ? `<span class="prof-tag" title="${tags.slice(4).join(', ')}">...</span>` : '';
-                    
-                    return `
-                        <div class="prof-card" onclick="openProfModal(${index})">
-                            <div class="prof-name">
-                                ${p["姓名"]}
-                                <span class="prof-title-badge">${p["职称"]}</span>
-                            </div>
-                            <div class="prof-tags">
-                                ${tagsHtml} ${moreTags}
-                            </div>
-                        </div>
-                    `;
-                }).join("");
-            } else {
-                profsHtml = `
-                    <div class='flex flex-col items-center justify-center p-6 text-slate-500 bg-slate-800/30 rounded-lg border border-slate-700/50 border-dashed'>
-                        <svg class="w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <span class="text-sm">该标签下暂无教授信息</span>
-                    </div>`;
-            }
-
-            content.innerHTML = `
-                <div class="mb-4 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                    <p class="text-sm text-slate-300 leading-relaxed">${d.desc}</p>
-                </div>
-                
-                <div class="mb-4">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">交叉/关联领域</h4>
-                    <div class="flex flex-wrap gap-1">${neighborTags}</div>
-                </div>
-
-                <div class="pt-4 border-t border-slate-700">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider">相关教授 / 学者</h4>
-                        <span class="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">${currentRelatedProfs.length}</span>
+function renderSearchResults(results) {
+    currentView = 'search';
+    const cards = results.length > 0
+        ? results.map((p, i) => {
+            const cat = CATEGORIES.find(c => c.id === p['大类']) || { color: '#64748b', name: '未分类' };
+            const tags = (p['研究兴趣标签'] || []).slice(0, 5);
+            const tagsHtml = tags.map(t => `<span class="tag">${t}</span>`).join('');
+            return `
+                <div class="prof-card" onclick="openModal('${p['大类'] || ''}', ${i})"
+                     style="border-left: 3px solid ${cat.color};">
+                    <div class="name-row">
+                        <span class="name">${p['姓名']}</span>
+                        <span class="title-badge">${p['职称']}</span>
                     </div>
-                    <div class="prof-list">
-                        ${profsHtml}
-                    </div>
-                </div>
-                
-                <button onclick="backToFilterView()" class="mt-4 w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm rounded-lg transition-colors">
-                    ← 返回分类筛选
-                </button>
-            `;
-        }
-
-        // Back to filter view from node detail
-        function backToFilterView() {
-            selectedNode = null;
-            d3.selectAll('.node').classed('active', false);
-            document.getElementById('info-title').innerHTML = '集成电路学院';
-            
-            if (selectedNodeFilters.size > 0) {
-                highlightSelectedNodes();
-            } else {
-                resetVisuals();
-            }
-            updateProfessorList();
-        }
-
-        // --- Sidebar Collapse/Expand Logic ---
-        let sidebarCollapsed = true;
-
-        function toggleSidebarCollapse() {
-            const sidebar = document.getElementById('sidebar');
-            const collapseText = document.querySelector('.collapse-text');
-            
-            sidebarCollapsed = !sidebarCollapsed;
-            
-            if (sidebarCollapsed) {
-                sidebar.classList.add('collapsed');
-                collapseText.textContent = '展开';
-            } else {
-                sidebar.classList.remove('collapsed');
-                collapseText.textContent = '折叠';
-            }
-        }
-
-        // --- Task 3: Sidebar Resizing Logic ---
-        const sidebar = document.getElementById('sidebar');
-        const resizer = document.getElementById('sidebar-resizer');
-        let isResizing = false;
-
-        resizer.addEventListener('mousedown', (e) => {
-            if (sidebarCollapsed) return; // Don't allow resize when collapsed
-            isResizing = true;
-        document.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                resizer.classList.remove('active');
-                document.body.style.cursor = 'default';
-                // Re-enable transition for show/hide
-                sidebar.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-            }
-        }); // Calculate width: from right edge of window to mouse position
-            // Sidebar is anchored right: width = windowWidth - mouseX
-            const newWidth = window.innerWidth - e.clientX;
-            
-            // Constrain width
-            const maxWidth = window.innerWidth * 0.8;
-            if (newWidth >= 320 && newWidth <= maxWidth) {
-                sidebar.style.width = newWidth + 'px';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isResizing) {
-                isResizing = false;
-                resizer.classList.remove('active');
-                document.body.style.cursor = 'default';
-                // Re-enable transition for show/hide
-                sidebar.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-            }
-        });
-
-        // --- Modal Logic ---
-        function openProfModal(index) {
-            const p = currentRelatedProfs[index];
-            if (!p) return;
-
-            const modal = document.getElementById('prof-modal');
-            const nameEl = document.getElementById('modal-prof-name');
-            const titleEl = document.getElementById('modal-prof-title');
-            const bodyEl = document.getElementById('prof-modal-body');
-            
-            nameEl.textContent = p["姓名"];
-            titleEl.textContent = p["职称"];
-            
-            // Build groups HTML
-            const groups = p["所属的研究组"] || [];
-            const groupsHtml = groups.length ? 
-                groups.map(g => `<span class="inline-block px-2 py-1 bg-slate-700 rounded text-xs text-slate-300 mr-2 mb-1">${g}</span>`).join("") : 
-                '<span class="text-slate-500 text-sm">暂无特定研究组信息</span>';
-
-            // Build tags HTML
-            const tags = p["研究兴趣标签"] || [];
-            const tagsHtml = tags.map(t => `<span class="tag bg-blue-900/30 text-blue-300 border border-blue-800/50">${t}</span>`).join("");
-            
-            // Build links
-            const homePage = p["个人主页"];
-            let homePageHtml = "";
-            if (homePage) {
-                homePageHtml = `<div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50"><div class="info-label">个人主页</div><div class="info-value truncate"><a href="${homePage}" target="_blank">访问主页 &rarr;</a></div></div>`;
-            }
-            
-            // Safe get for fields
-            const aiIntro = (p["AI 简介"] || "暂无详细简介").replace(/\n/g, '<br>');
-            const recruitInfo = (p["招收学生状况"] || "未提及").replace(/\n/g, '<br>');
-
-            bodyEl.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Column: Key Info -->
-                    <div class="lg:col-span-1 space-y-4">
-                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                            <div class="info-label">所属研究组</div>
-                            <div class="flex flex-wrap">${groupsHtml}</div>
-                        </div>
-                        
-                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
-                            <div class="info-label">研究兴趣</div>
-                            <div class="flex flex-wrap gap-1">${tagsHtml}</div>
-                        </div>
-
-                        ${homePageHtml}
-                    </div>
-
-                    <!-- Right Column: Detail -->
-                    <div class="lg:col-span-2">
-                        <div class="info-section">
-                            <div class="info-label text-blue-400">学术简介</div>
-                            <div class="info-value text-justify text-slate-300">
-                                ${aiIntro}
-                            </div>
-                        </div>
-
-                        <div class="info-section bg-green-900/10 p-5 rounded-xl border border-green-900/30">
-                            <div class="info-label text-green-400 flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 19.477 5.754 19 7.5 19s3.332.477 4.5 1.253v-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 19.477 18.247 19 16.5 19c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                                招生/招聘状况
-                            </div>
-                            <div class="info-value text-sm">
-                                ${recruitInfo}
-                            </div>
-                        </div>
-                    </div>
+                    <div class="tags">${tagsHtml}</div>
+                    <div class="groups" style="margin-top:4px;color:${cat.color};">${cat.name}</div>
                 </div>
             `;
-            
-            modal.classList.add('active');
-        }
+        }).join('')
+        : `<div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <p>未找到匹配 "${searchQuery}" 的教师</p>
+        </div>`;
 
-        function closeModal() {
-            document.getElementById('prof-modal').classList.remove('active');
-        }
+    document.getElementById('main-content').innerHTML = `
+        <div class="prof-list-container">
+            <div class="prof-list-header">
+                <h2>🔍 搜索结果</h2>
+                <p class="subtitle">找到 ${results.length} 位匹配 "${searchQuery}" 的教师</p>
+            </div>
+            <div class="prof-grid">${cards}</div>
+        </div>
+    `;
+    updateBreadcrumb(null);
+    document.getElementById('breadcrumb').innerHTML = `
+        <button onclick="renderCategories()">🔬 集成电路学院</button>
+        <span class="sep">›</span>
+        <span class="current">🔍 搜索: ${searchQuery} (${results.length})</span>
+    `;
+}
 
-        function getGroupName(index) {
-            const names = ["理论与数据挖掘", "计算机视觉与图形学", "NLP与生成式AI", "机器人与硬件", "交叉科学与前沿"];
-            return names[index];
-        }
-
-        // --- Simulation Ticks ---
-
-        simulation.on("tick", () => {
-            link
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-
-            node
-                .attr("transform", d => `translate(${d.x},${d.y})`);
+// ==================== MODAL ====================
+function openModal(catId, index) {
+    let profs;
+    if (currentView === 'search') {
+        const q = searchQuery.toLowerCase();
+        profs = professorsData.filter(p => {
+            const name = (p['姓名'] || '').toLowerCase();
+            const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
+            const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
+            return name.includes(q) || tags.includes(q) || groups.includes(q);
         });
-
-        // --- Helpers ---
-
-        function dragstarted(event, d) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            d.fx = d.x;
-            d.fy = d.y;
-        }
-
-        function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
-
-        function dragended(event, d) {
-            if (!event.active) simulation.alphaTarget(0);
-            d.fx = null;
-            d.fy = null;
-        }
-
-        // Text wrapping helper
-        function wrap(text, width) {
-            text.each(function() {
-                // Simple wrapping logic can be complex in SVG, 
-                // for this demo we keep labels short or allow overflow visually managed by spacing.
-                // We mainly rely on the sidebar for details.
+    } else {
+        profs = professorsData.filter(p => p['大类'] === catId);
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            profs = profs.filter(p => {
+                const name = (p['姓名'] || '').toLowerCase();
+                const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
+                const groups = (p['所属的研究组'] || []).join(' ').toLowerCase();
+                return name.includes(q) || tags.includes(q) || groups.includes(q);
             });
         }
+    }
 
-        // Handle resize
-        window.addEventListener('resize', () => {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            svg.attr("width", w).attr("height", h)
-               .attr("viewBox", [-w / 2, -h / 2, w, h]);
-            
-            // Update center force on resize
-            simulation.force("x", d3.forceX(-w * 0.2));
-            simulation.alpha(0.3).restart();
-        });
+    const p = profs[index];
+    if (!p) return;
 
-    </script>
+    document.getElementById('modal-name').textContent = p['姓名'];
+    document.getElementById('modal-title-badge').textContent = p['职称'];
+
+    const tags = (p['研究兴趣标签'] || []).map(t => `<span class="tag-item">${t}</span>`).join('');
+    const groups = (p['所属的研究组'] || []);
+    const groupsHtml = groups.length
+        ? groups.map(g => `<span class="group-item">${g}</span>`).join('')
+        : '<span style="color:#64748b;">暂无信息</span>';
+    const homepage = p['个人主页']
+        ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>`
+        : '<span style="color:#64748b;">暂无</span>';
+    const aiIntro = (p['AI 简介'] || '暂无详细简介').replace(/\n/g, '<br>');
+    const recruit = (p['招收学生状况'] || '未提及').replace(/\n/g, '<br>');
+    const catName = CATEGORIES.find(c => c.id === p['大类'])?.name || '未分类';
+
+    document.getElementById('modal-body').innerHTML = `
+        <div class="section">
+            <div class="section-label">所属大类</div>
+            <div class="section-value">${catName}</div>
+        </div>
+        <div class="section">
+            <div class="section-label">研究兴趣</div>
+            <div class="tag-list">${tags || '<span style="color:#64748b;">暂无</span>'}</div>
+        </div>
+        <div class="section">
+            <div class="section-label">所属研究组</div>
+            <div class="section-value">${groupsHtml}</div>
+        </div>
+        <div class="section">
+            <div class="section-label">个人主页</div>
+            <div class="section-value">${homepage}</div>
+        </div>
+        <div class="section">
+            <div class="section-label" style="color:#60a5fa;">学术简介</div>
+            <div class="section-value" style="text-align:justify;">${aiIntro}</div>
+        </div>
+        <div class="section" style="background:rgba(16,185,129,0.08);padding:16px;border-radius:12px;border:1px solid rgba(16,185,129,0.2);">
+            <div class="section-label" style="color:#34d399;">📋 招生/招聘</div>
+            <div class="section-value">${recruit}</div>
+        </div>
+    `;
+    document.getElementById('prof-modal').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('prof-modal').classList.remove('active');
+}
+
+// Esc to close modal
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+</script>
 </body>
 </html>
