@@ -202,7 +202,7 @@ onMounted(() => {
       // vdW dashed lines between layers (only draw bonds near visible area)
       bonds.slice(0, 40).forEach(b => {
         if (b.y2 < 20 || b.y2 > H - 15) return
-        const bx = b.x1 + slide * (b.layer === 0 ? 0 : 0.5)
+        const bx = b.x1 + slide * 0.5
         ctx.strokeStyle = 'rgba(124,77,255,0.04)'; ctx.lineWidth = 0.3
         ctx.setLineDash([2, 4])
         ctx.beginPath(); ctx.moveTo(bx, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke()
@@ -384,9 +384,12 @@ onMounted(() => {
         const dx = (ci.x + ci.w / 2) - (cj.x + cj.w / 2)
         const dy = (ci.y + ci.h / 2) - (cj.y + cj.h / 2)
         if (Math.sqrt(dx * dx + dy * dy) < 100) {
-          const bi = bumps[i][Math.floor(Math.random() * bumps[i].length)]
-          const bj = bumps[j][Math.floor(Math.random() * bumps[j].length)]
-          if (bi && bj) connections.push({ x1: bi.x, y1: bi.y, x2: bj.x, y2: bj.y })
+          const biList = bumps[i], bjList = bumps[j]
+          if (biList.length && bjList.length) {
+            const bi = biList[Math.floor(Math.random() * biList.length)]
+            const bj = bjList[Math.floor(Math.random() * bjList.length)]
+            if (bi && bj) connections.push({ x1: bi.x, y1: bi.y, x2: bj.x, y2: bj.y })
+          }
         }
       }
     }
@@ -1310,8 +1313,15 @@ onMounted(() => {
   const starters = [startTransistor, start2DMaterial, startSpintronics, startChiplet, startHBM, startEDA, startWBG, startSerDes, startPMIC, startRISC, startSystolic, startNeuromorphic]
   nextTick(() => {
     const canvases = gridRef.value && gridRef.value.querySelectorAll('canvas')
-    if (canvases) {
-      starters.forEach((fn, i) => { if (canvases[i]) fn(canvases[i]) })
+    if (canvases && canvases.length) {
+      starters.forEach((fn, i) => {
+        if (!canvases[i]) return
+        try {
+          fn(canvases[i])
+        } catch (e) {
+          console.error(`[TechShowcase] Animation ${i} (${techs[i]?.name}) failed:`, e)
+        }
+      })
     }
   })
 })
