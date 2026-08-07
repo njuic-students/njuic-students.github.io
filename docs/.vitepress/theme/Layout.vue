@@ -13,9 +13,6 @@
     <template #layout-bottom>
       <CoursePageAutoTemplate />
     </template>
-    <template #doc-after>
-      <Giscus />
-    </template>
   </DefaultTheme.Layout>
 </template>
 
@@ -26,5 +23,4 @@ import NeuralBackground from './components/NeuralBackground.vue'
 import TextAnimations from './components/TextAnimations.vue'
 import TechShowcase from './components/TechShowcase.vue'
 import CoursePageAutoTemplate from './components/CoursePageAutoTemplate.vue'
-import Giscus from './components/Giscus.vue'
 </script>
