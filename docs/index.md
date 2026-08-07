@@ -3,9 +3,9 @@
 layout: home
 
 hero:
-  name: "智科全家桶"
-  text: "NJU Intelligence Science & Technology"
-  tagline: "南京大学智能科学与技术学院 · wiki"
+  name: "集成全家桶"
+  text: "NJU Integrated Circuits"
+  tagline: "南京大学集成电路学院 · wiki"
   actions: []
 
 features:

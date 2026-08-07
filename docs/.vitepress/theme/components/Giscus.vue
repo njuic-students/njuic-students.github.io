@@ -17,7 +17,7 @@ function loadGiscus() {
   script.src = 'https://giscus.app/client.js'
 
   // ─── 仓库信息（repo-id 已自动获取，category-id 需你填写）───
-  script.setAttribute('data-repo', 'NJUIS-Students/NJUIS-Students.github.io')
+  script.setAttribute('data-repo', 'njuic-students/njuic-students.github.io')
   script.setAttribute('data-repo-id', 'R_kgDOQ_A7LA')
   script.setAttribute('data-category', 'General')
   script.setAttribute('data-category-id', 'DIC_kwDOQ_A7LM4C3vRJ') // 👈 安装 giscus App 后从 giscus.app 获取

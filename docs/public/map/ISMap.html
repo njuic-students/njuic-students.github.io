@@ -419,7 +419,7 @@
         
         <!-- Sidebar Header with Collapse Button -->
         <div class="sidebar-header">
-            <h2 id="info-title" class="text-xl font-bold text-white">智能科学与技术学院</h2>
+            <h2 id="info-title" class="text-xl font-bold text-white">集成电路学院</h2>
             <button class="collapse-btn" onclick="toggleSidebarCollapse()" title="折叠/展开侧边栏">
                 <svg class="collapse-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -1112,7 +1112,7 @@
         function backToFilterView() {
             selectedNode = null;
             d3.selectAll('.node').classed('active', false);
-            document.getElementById('info-title').innerHTML = '智能科学与技术学院';
+            document.getElementById('info-title').innerHTML = '集成电路学院';
             
             if (selectedNodeFilters.size > 0) {
                 highlightSelectedNodes();

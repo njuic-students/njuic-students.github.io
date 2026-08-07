@@ -37,7 +37,7 @@
           <p class="course-card__resource-text">课程资料库（课件、实验说明、往年试卷、复习资料等）</p>
           <a
             class="course-card__button course-card__button--repo"
-            href="https://github.com/NJUIS-Students/Resources/tree/main/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"
+            href="https://github.com/njuic-students/Resources/tree/main/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"
             target="_blank"
             rel="noreferrer"
           >
