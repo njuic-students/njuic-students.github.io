@@ -841,7 +841,7 @@
   color: var(--vp-c-text-1);
 }
 
-/* Current OSCourseCard template styles */
+/* 课程卡片模板样式 */
 .vp-doc .course-card__layout {
   display: grid;
   grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.28fr);

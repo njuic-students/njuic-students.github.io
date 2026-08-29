@@ -183,13 +183,13 @@ function extractRepo(nodes: Element[]): { url: string; text: string; consumedNod
   consumedNodes.add(sourceNode)
 
   // Handle markdown line-break style:
-  // "课程资料库（...）：  " + next line "[repo](...)"
+  // "课程资料（...）：  " + next line "[repo](...)"
   if ((!textCandidate || /^repo$/i.test(textCandidate)) && first.index > 0) {
     const prevNode = nodes[first.index - 1]
     const prevText = cleanText(prevNode.textContent)
     if (
       prevText &&
-      /(课程资料库|资料库|slides|课件|往年卷|复习资料)/i.test(prevText) &&
+      /(课程资料|slides|课件|往年卷|复习资料)/i.test(prevText) &&
       /[：:]$/.test(prevText)
     ) {
       textCandidate = normalizeRepoText(prevText)
@@ -202,7 +202,7 @@ function extractRepo(nodes: Element[]): { url: string; text: string; consumedNod
       nodes
         .map((node) => cleanText(node.textContent))
         .map((line) => normalizeRepoText(line))
-        .find((line) => line && (line.includes('课程资料库') || line.toLowerCase().includes('slides'))) ||
+        .find((line) => line && (line.includes('课程资料') || line.toLowerCase().includes('slides'))) ||
       '课程资料入口'
   }
 
@@ -451,7 +451,7 @@ function applyCourseTemplate(): boolean {
 
   if (doc.dataset.courseTemplatePath === pathKey) return true
 
-  // Already a hand-crafted component page (e.g. OSCourseCard)
+  // Already a hand-crafted component page
   if (doc.querySelector('.course-card-page') && !doc.querySelector('.course-card-page--auto')) {
     doc.dataset.courseTemplatePath = pathKey
     return true

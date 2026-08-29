@@ -30,13 +30,6 @@ const vitePressOptions = {
     nav: [
       { text: '博客', link: '/1-基础篇/1-博客简介' },
       { text: '贡献指南', link: '/7-贡献篇/1-贡献指南' },
-      {
-        text: '资源',
-        items: [
-          { text: '资源仓库', link: 'https://github.com/njuic-students/Resources' },
-          { text: '资源仓库镜像站', link: 'https://resources.sporeking.top/njuic-Resources' }
-        ]
-      },
       { text: 'GitHub', link: 'https://github.com/njuic-students/njuic-students.github.io' }
     ],
 

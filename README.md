@@ -58,7 +58,6 @@ npm run docs:preview
 ## 相关链接
 
 - 项目仓库：[njuic-students.github.io](https://github.com/njuic-students/njuic-students.github.io)
-- 资源仓库：[njuic-students/Resources](https://github.com/njuic-students/Resources)
 
 <div align="center">
   <sub>Built with VitePress · Maintained by NJUIC students</sub>
