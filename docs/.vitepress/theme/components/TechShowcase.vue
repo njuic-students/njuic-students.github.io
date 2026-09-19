@@ -24,18 +24,18 @@ let animationIds = []
 
 const base = '/前沿技术/'
 const techs = [
-  { name: 'Advanced Process & Transistors', desc: 'Planar → FinFET → GAA', link: base + '1-先进制程与晶体管' },
-  { name: '2D Semiconductor Materials', desc: 'Atomic-layer Crystal & Sliding', link: base + '2-二维半导体材料' },
-  { name: 'Spintronics', desc: 'MTJ & Spin-Transfer Torque', link: base + '3-自旋电子学' },
-  { name: 'Chiplet', desc: 'Heterogeneous Die-to-Die', link: base + '4-芯粒' },
-  { name: 'High Bandwidth Memory', desc: '3D-Stacked DRAM & TSV', link: base + '5-高带宽存储' },
-  { name: 'EDA & AI-Assisted Design', desc: 'RL Placement & Routing', link: base + '6-EDA与AI辅助芯片设计' },
-  { name: 'Wide Bandgap Semiconductors', desc: 'SiC, GaN & Ga₂O₃ Power', link: base + '7-宽禁带半导体' },
-  { name: 'High-Speed SerDes', desc: 'PAM4 Signaling & Eye Diagram', link: base + '8-高速接口SerDes' },
-  { name: 'PMIC', desc: 'Buck, LDO & Multi-Phase', link: base + '9-PMIC' },
-  { name: 'RISC-V & Open-Source CPU', desc: '5-Stage Pipeline & Forwarding', link: base + '10-RISC-V与开源处理器' },
-  { name: 'AI Processor Architecture', desc: 'Systolic Array & MAC Operation', link: base + '11-AI处理器架构与智能计算系统' },
-  { name: 'Neuromorphic Computing', desc: 'Spiking Neural Network', link: base + '12-神经形态计算芯片' },
+  { name: 'Advanced Process & Transistors', desc: 'Planar → FinFET → GAA', link: base + '1-先进制程与晶体管.html' },
+  { name: '2D Semiconductor Materials', desc: 'Atomic-layer Crystal & Sliding', link: base + '2-二维半导体材料.html' },
+  { name: 'Spintronics', desc: 'MTJ & Spin-Transfer Torque', link: base + '3-自旋电子学.html' },
+  { name: 'Chiplet', desc: 'Heterogeneous Die-to-Die', link: base + '4-芯粒.html' },
+  { name: 'High Bandwidth Memory', desc: '3D-Stacked DRAM & TSV', link: base + '5-高带宽存储.html' },
+  { name: 'EDA & AI-Assisted Design', desc: 'RL Placement & Routing', link: base + '6-EDA与AI辅助芯片设计.html' },
+  { name: 'Wide Bandgap Semiconductors', desc: 'SiC, GaN & Ga₂O₃ Power', link: base + '7-宽禁带半导体.html' },
+  { name: 'High-Speed SerDes', desc: 'PAM4 Signaling & Eye Diagram', link: base + '8-高速接口SerDes.html' },
+  { name: 'PMIC', desc: 'Buck, LDO & Multi-Phase', link: base + '9-PMIC.html' },
+  { name: 'RISC-V & Open-Source CPU', desc: '5-Stage Pipeline & Forwarding', link: base + '10-RISC-V与开源处理器.html' },
+  { name: 'AI Processor Architecture', desc: 'Systolic Array & MAC Operation', link: base + '11-AI处理器架构与智能计算系统.html' },
+  { name: 'Neuromorphic Computing', desc: 'Spiking Neural Network', link: base + '12-神经形态计算芯片.html' },
 ]
 
 onMounted(() => {
