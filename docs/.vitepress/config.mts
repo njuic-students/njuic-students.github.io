@@ -2,10 +2,63 @@ import { defineConfig } from 'vitepress'
 import { withSidebar } from 'vitepress-sidebar';
 import mathjax3 from 'markdown-it-mathjax3';
 
+const SITE_URL = 'https://njuic-students.github.io';
+const SITE_DESCRIPTION = '一个面向南京大学集成电路学院同学的民间Wiki';
+const OG_IMAGE = `${SITE_URL}/og-banner.png`;
+
+const ENTITIES: Record<string, string> = {
+  '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' '
+};
+
+// 用正文首段生成页面摘要；取不到或过短时回退到站点简介
+function pageDescription(content: string | undefined, fallback: string) {
+  const paragraph = content?.match(/<p>([\s\S]*?)<\/p>/)?.[1];
+  if (!paragraph) return fallback;
+
+  const text = paragraph
+    .replace(/<[^>]*>/g, '')
+    .replace(/&[a-z#0-9]+;/gi, (entity) => ENTITIES[entity.toLowerCase()] ?? ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (text.length < 24) return fallback;
+  return text.length > 120 ? `${text.slice(0, 120)}…` : text;
+}
+
 const vitePressOptions = {
   lang: "zh-CN",
   title: "集成全家桶",
-  description: "一个面向南京大学集成电路学院同学的民间Wiki",
+  description: SITE_DESCRIPTION,
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' }],
+    ['meta', { name: 'theme-color', content: '#0ea5e9' }],
+    ['meta', { property: 'og:site_name', content: '集成全家桶 · NJUIC Wiki' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:locale', content: 'zh_CN' }],
+    ['meta', { property: 'og:image', content: OG_IMAGE }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:image', content: OG_IMAGE }]
+  ],
+  sitemap: {
+    hostname: SITE_URL
+  },
+  // 逐页补 og:url / og:title / og:description（VitePress 默认只输出 meta description）
+  transformHead({ pageData, title, content }) {
+    const route = pageData.relativePath
+      .replace(/(^|\/)index\.md$/, '$1')
+      .replace(/\.md$/, '.html');
+    const url = encodeURI(`${SITE_URL}/${route}`);
+    const description = pageData.frontmatter?.description || pageDescription(content, SITE_DESCRIPTION);
+
+    return [
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+      ['meta', { name: 'twitter:title', content: title }],
+      ['meta', { name: 'twitter:description', content: description }]
+    ];
+  },
   markdown: {
     config: (md) => {
       md.use(mathjax3);
@@ -29,6 +82,7 @@ const vitePressOptions = {
     },
     nav: [
       { text: '博客', link: '/1-基础篇/1-博客简介' },
+      { text: '前沿技术', link: '/前沿技术/1-先进制程与晶体管' },
       { text: '贡献指南', link: '/7-贡献篇/1-贡献指南' },
       { text: 'GitHub', link: 'https://github.com/njuic-students/njuic-students.github.io' }
     ],
@@ -53,8 +107,8 @@ const vitePressSidebarOptions = {
   sortMenusOrderByDescending: false,
   removePrefixAfterOrdering: true,
   prefixSeparator: '-',
-  // enable debug printing to see generated sidebar in console
-  debugPrint: true
+  // set to true only when you need to inspect the generated sidebar in build logs
+  debugPrint: false
   // useFolderTitleFromIndexFile: true
   // sortMenusByFrontmatterOrder: true,
   // frontmatterOrderDefaultValue: 999,

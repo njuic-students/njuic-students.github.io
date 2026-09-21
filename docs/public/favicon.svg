@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="集成全家桶 NJUIC Wiki">
+  <defs>
+    <linearGradient id="njuic-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0ea5e9" />
+      <stop offset="1" stop-color="#22c55e" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#njuic-bg)" />
+  <g stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.85">
+    <path d="M23 9v7M32 9v7M41 9v7M23 48v7M32 48v7M41 48v7" />
+    <path d="M9 23h7M9 32h7M9 41h7M48 23h7M48 32h7M48 41h7" />
+  </g>
+  <rect x="18" y="18" width="28" height="28" rx="6" fill="#ffffff" fill-opacity="0.18" stroke="#ffffff" stroke-width="3" />
+  <rect x="27" y="27" width="10" height="10" rx="2.5" fill="#ffffff" />
+</svg>

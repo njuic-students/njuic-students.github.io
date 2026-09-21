@@ -41,10 +41,10 @@
               v-for="link in item.links"
               :key="`${item.name}-${link.label}`"
               class="contributor-card__link"
-              :href="link.href || undefined"
+              :href="resolvedHref(link)"
               :type="link.value && !link.href ? 'button' : undefined"
-              :target="isExternal(link.href) ? '_blank' : undefined"
-              :rel="isExternal(link.href) ? 'noreferrer' : undefined"
+              :target="isExternal(resolvedHref(link)) ? '_blank' : undefined"
+              :rel="isExternal(resolvedHref(link)) ? 'noreferrer' : undefined"
               :aria-label="linkAriaLabel(link)"
               :title="linkTitle(link)"
               @click="handleLinkClick(item, link)"
@@ -162,6 +162,18 @@ function displayInitials(item: ContributorItem) {
 
 function isExternal(href?: string) {
   return Boolean(href && /^(https?:)?\/\//.test(href))
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i
+
+// `href` 支持三种写法：完整 URL、站内路径、纯邮箱地址（自动补 mailto:）
+function resolvedHref(link: ContributorLink) {
+  const href = link.href?.trim()
+  if (!href) return undefined
+  if (SCHEME_RE.test(href) || href.startsWith('//') || href.startsWith('/') || href.startsWith('#')) return href
+  if (EMAIL_RE.test(href)) return `mailto:${href}`
+  return href
 }
 
 function linkTag(link: ContributorLink) {
