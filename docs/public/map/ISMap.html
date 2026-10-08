@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>集成电路学院教师图谱</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --cat1: #3b82f6; --cat1-bg: rgba(59,130,246,0.12);
             --cat2: #10b981; --cat2-bg: rgba(16,185,129,0.12);
             --cat3: #f59e0b; --cat3-bg: rgba(245,158,11,0.12);
             --cat4: #8b5cf6; --cat4-bg: rgba(139,92,246,0.12);
+            /* 仅新增变量，原有深色样式保持不变 */
+            --dim: #94a3b8; --muted: #64748b;
         }
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -131,6 +132,47 @@
             .top-bar { flex-direction: column; align-items: flex-start; }
             .search-box { width: 100%; }
         }
+
+        /* ====== 浅色主题（跟随站点主题，由脚本切换 html.theme-light） ====== */
+        html.theme-light { --dim: #64748b; --muted: #94a3b8; }
+        html.theme-light body { background-color: #ffffff; color: #1e293b; }
+        html.theme-light .top-bar { background: rgba(255,255,255,0.92); border-bottom-color: #e2e8f0; }
+        html.theme-light .breadcrumb button, html.theme-light .breadcrumb .crumb-link { color: #64748b; }
+        html.theme-light .breadcrumb button:hover, html.theme-light .breadcrumb .crumb-link:hover { color: #2563eb; background: rgba(37,99,235,0.08); }
+        html.theme-light .breadcrumb .sep { color: #cbd5e1; }
+        html.theme-light .breadcrumb .current { color: #0f172a; }
+        html.theme-light .search-box input { background: #f8fafc; border-color: #e2e8f0; color: #1e293b; }
+        html.theme-light .search-box input:focus { border-color: #2563eb; }
+        html.theme-light .search-box input::placeholder { color: #94a3b8; }
+        html.theme-light .search-box svg { color: #94a3b8; }
+        html.theme-light .section-title { color: #0f172a; }
+        html.theme-light .section-sub { color: #94a3b8; }
+        html.theme-light .card { background: #ffffff; border-color: #e2e8f0; }
+        html.theme-light .card:hover { box-shadow: 0 10px 32px rgba(15,23,42,0.12); }
+        html.theme-light .card .card-name { color: #0f172a; }
+        html.theme-light .card .card-count { color: #94a3b8; }
+        html.theme-light .prof-card { background: #ffffff; border-color: #e2e8f0; }
+        html.theme-light .prof-card:hover { background: #f8fafc; border-color: #2563eb; box-shadow: 0 4px 14px rgba(15,23,42,0.1); }
+        html.theme-light .prof-card .name { color: #0f172a; }
+        html.theme-light .prof-card .badge { background: rgba(37,99,235,0.10); color: #2563eb; border-color: rgba(37,99,235,0.20); }
+        html.theme-light .prof-card .tag { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+        html.theme-light .prof-card .groups { color: #94a3b8; }
+        html.theme-light .modal-overlay { background: rgba(15,23,42,0.45); }
+        html.theme-light .modal-content { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 20px 50px rgba(15,23,42,0.25); }
+        html.theme-light .modal-header { background: #f8fafc; border-bottom-color: #e2e8f0; }
+        html.theme-light .modal-header h3 { color: #0f172a; }
+        html.theme-light .modal-close { color: #94a3b8; }
+        html.theme-light .modal-close:hover { color: #0f172a; }
+        html.theme-light .modal-body { color: #334155; }
+        html.theme-light .modal-body .sec-label { color: #94a3b8; }
+        html.theme-light .modal-body .sec-value { color: #1e293b; }
+        html.theme-light .modal-body .sec-value a { color: #2563eb; }
+        html.theme-light .tag-item { background: rgba(37,99,235,0.08); color: #2563eb; border-color: rgba(37,99,235,0.18); }
+        html.theme-light .group-item { background: #f1f5f9; color: #475569; }
+        html.theme-light .empty-state { color: #94a3b8; }
+        html.theme-light ::-webkit-scrollbar-track { background: #f1f5f9; }
+        html.theme-light ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+
     </style>
 </head>
 <body>
@@ -202,7 +244,7 @@ function renderBigCategories() {
     document.getElementById('main-content').innerHTML = `
         <div class="cards-container">
             <p class="section-title">集成电路学院 · 教师图谱</p>
-            <p class="section-sub">按四大方向分类浏览，共 <b style="color:#94a3b8;">${total}</b> 位教师</p>
+            <p class="section-sub">按四大方向分类浏览，共 <b style="color:var(--dim);">${total}</b> 位教师</p>
             <div class="cards-grid">
                 ${BIG_CATEGORIES.map(c => `
                     <div class="card cat-card" onclick="renderSubCategories('${c.id}')">
@@ -275,7 +317,7 @@ function renderProfessors(catId, sub) {
     document.getElementById('main-content').innerHTML = `
         <div class="cards-container">
             <p class="section-title">${cat.icon} ${cat.name} › ${sub}</p>
-            <p class="section-sub">共 <b style="color:#94a3b8;">${profs.length}</b> 位教师</p>
+            <p class="section-sub">共 <b style="color:var(--dim);">${profs.length}</b> 位教师</p>
             <div class="prof-grid">${profCards}</div>
         </div>`;
     window.scrollTo({top:0,behavior:'smooth'});
@@ -379,12 +421,12 @@ function openModalGeneric(profs, index) {
     const cat = BIG_CATEGORIES.find(c => c.id === p['大类']);
     const catName = cat ? `${cat.icon} ${cat.name}` : '未分类';
     const tags = (p['研究兴趣标签'] || []).map(t => `<span class="tag-item">${t}</span>`).join('');
-    const hp = p['个人主页'] ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>` : '<span style="color:#64748b;">暂无</span>';
+    const hp = p['个人主页'] ? `<a href="${p['个人主页']}" target="_blank">访问主页 →</a>` : '<span style="color:var(--muted);">暂无</span>';
     const intro = (p['AI 简介'] || '暂无详细简介').replace(/\n/g, '<br>');
 
     document.getElementById('modal-body').innerHTML = `
         <div class="sec"><div class="sec-label">所属分类</div><div class="sec-value">${catName}${p['小类']?' › '+p['小类']:''}</div></div>
-        <div class="sec"><div class="sec-label">研究兴趣</div><div class="sec-value">${tags||'<span style="color:#64748b;">暂无</span>'}</div></div>
+        <div class="sec"><div class="sec-label">研究兴趣</div><div class="sec-value">${tags||'<span style="color:var(--muted);">暂无</span>'}</div></div>
         <div class="sec"><div class="sec-label">个人主页</div><div class="sec-value">${hp}</div></div>
         <div class="sec"><div class="sec-label" style="color:#60a5fa;">学术简介</div><div class="sec-value" style="text-align:justify;">${intro}</div></div>`;
     document.getElementById('prof-modal').classList.add('active');
@@ -399,6 +441,37 @@ function nameOrTags(p) {
     const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
     return name + ' ' + tags;
 }
+</script>
+<script>
+(function () {
+  function detect() {
+    try {
+      var doc = window.parent && window.parent.document;
+      if (doc && doc.documentElement) {
+        var cl = doc.documentElement.classList;
+        if (cl.contains("dark")) return true;
+        if (cl.contains("light")) return false;
+      }
+      var saved = window.parent.localStorage.getItem("vitepress-theme-appearance");
+      if (saved === "dark") return true;
+      if (saved === "light") return false;
+    } catch (e) {}
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function apply() {
+    document.documentElement.classList.toggle("theme-light", !detect());
+  }
+  apply();
+  try {
+    new MutationObserver(apply).observe(window.parent.document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  } catch (e) {}
+  try {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", apply);
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
