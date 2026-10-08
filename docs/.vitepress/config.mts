@@ -5,6 +5,9 @@ import mathjax3 from 'markdown-it-mathjax3';
 const SITE_URL = 'https://njuic-students.github.io';
 const SITE_DESCRIPTION = '一个面向南京大学集成电路学院同学的民间Wiki';
 const OG_IMAGE = `${SITE_URL}/og-banner.png`;
+// public/ 下的静态资源会被 CDN 缓存 10 分钟（cache-control: max-age=600）。
+// 用构建时间戳做版本号，保证每次部署后 iframe 与图谱数据都能立刻刷新。
+const BUILD_STAMP = Date.now().toString(36);
 
 const ENTITIES: Record<string, string> = {
   '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' '
@@ -42,6 +45,10 @@ const vitePressOptions = {
   ],
   sitemap: {
     hostname: SITE_URL
+  },
+  // 给图谱 iframe 的地址加上构建版本号，绕开静态资源的 10 分钟缓存
+  transformHtml(code) {
+    return code.replace(/\/map\/ISMap\.html(?=["'])/g, `/map/ISMap.html?v=${BUILD_STAMP}`);
   },
   // 逐页补 og:url / og:title / og:description（VitePress 默认只输出 meta description）
   transformHead({ pageData, title, content }) {
