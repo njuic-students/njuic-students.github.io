@@ -183,7 +183,7 @@
     </div>
     <div class="search-box">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" id="search-input" placeholder="搜索教师姓名、研究方向…" oninput="handleSearch(this.value)">
+        <input type="text" id="search-input" placeholder="搜索教师姓名、研究方向、职称…" autocomplete="off" spellcheck="false">
     </div>
 </div>
 
@@ -296,11 +296,7 @@ function renderProfessors(catId, sub) {
     updateBreadcrumb(catId, sub);
     const cat = BIG_CATEGORIES.find(c => c.id === catId);
 
-    let profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
-    if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        profs = profs.filter(p => nameOrTags(p).includes(q));
-    }
+    const profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
 
     const profCards = profs.length > 0
         ? profs.map((p, i) => {
@@ -312,7 +308,7 @@ function renderProfessors(catId, sub) {
                     <div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
                 </div>`;
         }).join('')
-        : `<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><p>${searchQuery?'没有匹配的教师':'该小类暂无教师'}</p></div>`;
+        : `<div class="empty-state"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><p>该小类暂无教师</p></div>`;
 
     document.getElementById('main-content').innerHTML = `
         <div class="cards-container">
@@ -324,22 +320,33 @@ function renderProfessors(catId, sub) {
 }
 
 // ==================== GLOBAL SEARCH ====================
-function handleSearch(query) {
-    searchQuery = query.trim();
-    if (searchQuery && (currentView === 'categories' || currentView === 'subcategories')) {
-        const q = searchQuery.toLowerCase();
-        const results = professorsData.filter(p => nameOrTags(p).includes(q));
-        renderSearchResults(results);
-    } else if (searchQuery && currentView === 'professors') {
-        renderProfessors(currentCat, currentSub);
-    } else if (!searchQuery) {
-        if (currentView === 'search') {
-            renderBigCategories();
-        } else if (currentView === 'professors') {
-            renderProfessors(currentCat, currentSub);
-        }
+// 中文输入法（IME）组合期间不能重绘界面：一旦 DOM 变动，拼音组合会被打断，
+// 表现就是"只能输入第一个字母"。因此组合中只记状态，等 compositionend 再搜索。
+let composing = false;
+
+function doSearch(raw) {
+    searchQuery = (raw || '').trim();
+    if (!searchQuery) {
+        renderBigCategories(); // 清空即回到分类首页
+        return;
     }
+    const q = searchQuery.toLowerCase();
+    renderSearchResults(professorsData.filter(p => nameOrTags(p).includes(q)));
 }
+
+(function bindSearch() {
+    const input = document.getElementById('search-input');
+    if (!input) return;
+    input.addEventListener('compositionstart', () => { composing = true; });
+    input.addEventListener('compositionend', (e) => { composing = false; doSearch(e.target.value); });
+    input.addEventListener('input', (e) => {
+        if (composing || e.isComposing) return; // 组合中不搜索、不重绘
+        doSearch(e.target.value);
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { input.value = ''; doSearch(''); }
+    });
+})();
 
 function renderSearchResults(results) {
     _searchResults = results;
@@ -369,7 +376,6 @@ function renderSearchResults(results) {
             <p class="section-sub">找到 ${results.length} 位教师</p>
             <div class="prof-grid">${cards}</div>
         </div>`;
-    window.scrollTo({top:0,behavior:'smooth'});
 }
 
 // Store search results for modal access
@@ -403,11 +409,7 @@ function updateBreadcrumb(catId, sub) {
 
 // ==================== MODAL ====================
 function openModal(catId, sub, index) {
-    let profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
-    if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        profs = profs.filter(p => nameOrTags(p).includes(q));
-    }
+    const profs = professorsData.filter(p => p['大类'] === catId && p['小类'] === sub);
     openModalGeneric(profs, index);
 }
 
@@ -435,11 +437,12 @@ function openModalGeneric(profs, index) {
 function closeModal() { document.getElementById('prof-modal').classList.remove('active'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-// Helper
+// Helper：把可检索字段拼成一个字符串（姓名 / 职称 / 大类 / 小类 / 研究兴趣 / 简介）
 function nameOrTags(p) {
-    const name = (p['姓名'] || '').toLowerCase();
-    const tags = (p['研究兴趣标签'] || []).join(' ').toLowerCase();
-    return name + ' ' + tags;
+    return [
+        p['姓名'], p['职称'], p['大类'], p['小类'],
+        (p['研究兴趣标签'] || []).join(' '), p['AI 简介']
+    ].join(' ').toLowerCase();
 }
 </script>
 <script>
